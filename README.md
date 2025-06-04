@@ -1,25 +1,41 @@
-Pruebas de Automatización con Playwright
-Este repositorio contiene pruebas automatizadas implementadas con Playwright, utilizando patrones de diseño avanzados como Page Object Model (POM) y su evolución hacia el patrón Screenplay para mejorar la mantenibilidad y escalabilidad.
+# 🧪 Playwright Automation
 
-🚀 Características
-✅ Patrón Page Object Model (POM)
+[![Playwright](https://img.shields.io/badge/Playwright-2.3.0+-blue?logo=playwright)](https://playwright.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-4.0+-3178C6?logo=typescript)](https://www.typescriptlang.org)
+[![Status](https://img.shields.io/badge/status-personal%20project-lightgrey)](https://github.com/tu-usuario/playwright-practice)
 
-Estructura clara y modularizada.
+**Repositorio personal** donde práctico y experimento con patrones avanzados de automatización usando Playwright, evolucionando desde POM hasta Screenplay.
 
-Separación de responsabilidades (locators, acciones, lógica de negocio).
+## 🎯 Objetivos Personales
 
-Fácil mantenimiento y reutilización de código.
+- ✅ Aprender en profundidad Playwright
+- 🔄 Comparar POM vs Screenplay en proyectos reales
+- 🧩 Implementar diferentes estrategias de testing
+- 📈 Evolucionar la arquitectura gradualmente
+- 🚨 Permitirme cometer errores y aprender
 
-✅ Evolución hacia Screenplay
+## 🔍 Contenido Experimental
 
-Modelo más centrado en el usuario y las interacciones.
+> ⚠️ **Nota importante**: Este es un proyecto de práctica personal, no un framework de producción.
 
-Uso de Tasks, Abilities y Interactions para mayor legibilidad.
+### 🧱 Page Object Model (POM)
+- Mi implementación inicial básica
+- Refactorizaciones progresivas
+- Diferentes enfoques de estructuración
 
-Fomenta mejores prácticas de automatización.
+### 🎭 Screenplay Pattern
+- Mis primeros intentos de implementación
+- Variaciones en la abstracción de Tasks
+- Distintos enfoques para las Abilities
 
-✅ Tecnologías utilizadas
+### 📊 Reporting con Allure
+- 🔍 Visualizar mejor los resultados de mis pruebas
+- 📈 Analizar patrones de fallos
+- 🧩 Experimentar con diferentes niveles de reporte
 
-Playwright: Framework rápido y confiable para pruebas E2E.
-
-TypeScript/JavaScript: Lenguaje principal para la implementación.
+### 🧪 Otras Pruebas
+- Experimentos con:
+  - Differentes tipos de assertions
+  - Estrategias de waiting
+  - Manejo de datos de prueba
+  - Reporting personalizado
