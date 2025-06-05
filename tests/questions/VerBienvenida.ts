@@ -1,13 +1,16 @@
-import { Encargado } from '../actors/Encargado';
-import { Vendedor } from '../actors/Vendedor';
-import { expect } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
 
-export async function verBienvenida(encargado: Encargado, textoEsperado: string) {
-  const titulo = encargado.page.locator('h1.bienvenido-principal');
-  await expect(titulo).toHaveText(textoEsperado);
-}
-
-export async function verBienvenidaVendedor(vendedor: Vendedor) {
-  const titulo = vendedor.page.locator('div.block-title.block-title-large', { hasText: 'TEST [SOLO EMIR]' });
+/**
+ * Verifica la bienvenida general para cualquier actor y selector.
+ * @param page Instancia de Playwright Page del actor.
+ * @param selector Selector CSS del elemento de bienvenida.
+ * @param textoEsperado Texto que debe estar visible en la bienvenida.
+ */
+export async function verBienvenidaGeneral(
+  page: Page,
+  selector: string,
+  textoEsperado: string
+) {
+  const titulo = page.locator(selector, { hasText: textoEsperado });
   await expect(titulo).toBeVisible();
 }
