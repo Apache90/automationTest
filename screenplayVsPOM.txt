@@ -1,0 +1,46 @@
+
+🔹 1. POM (Page Object Model)
+
+✅ ¿Qué es?
+El Page Object Model es un patrón de diseño para pruebas automatizadas. En este patrón, cada página (o componente importante) de tu aplicación web se representa como una clase o un objeto.
+
+🧱 Estructura típica:
+- Cada clase contiene:
+  - Selectores de los elementos de la página.
+  - Métodos que encapsulan interacciones con esos elementos.
+
+✅ Ventajas:
+- Código reutilizable.
+- Mayor legibilidad.
+- Mantenimiento centralizado.
+
+
+🔹 2. Screenplay Pattern
+
+✅ ¿Qué es?
+El Screenplay Pattern es una evolución más avanzada y orientada a actores del POM. Se basa en:
+- Actores que realizan tareas usando habilidades.
+- Muy usado en frameworks como Serenity/JS, pero también aplicable con Playwright manualmente.
+
+🧱 Conceptos clave:
+- Actor: Quién realiza una acción (e.g., el usuario).
+- Tarea: Qué hace (e.g., iniciar sesión).
+- Habilidad: Cómo lo hace (e.g., usar un navegador).
+
+✅ Ventajas:
+- Muy expresivo y cercano al lenguaje natural.
+- Fomenta la separación total de responsabilidades.
+- Escalable en pruebas complejas y colaborativas.
+
+
+⚖️ Comparación rápida:
+
+| Aspecto               | POM                              | Screenplay                               |
+|--------------- -------|----------------------------------|------------------------------------------|
+| Estilo                | Orientado a página               | Orientado a actores y tareas             |
+| Reutilización         | Alta                             | Muy alta                                 |
+| Curva de aprendizaje  | Baja-media                       | Media-alta                               |
+| Expresividad          | Moderada                         | Muy alta                                 |
+| Escalabilidad         | Buena                            | Excelente en pruebas grandes             |
+
+
