@@ -19,21 +19,21 @@ export class RegisterPage {
     this.page = page;
 
     // Localizar el formulario de registro específicamente
-    this.formRegistro = page.locator('.contenedor-form form');
+    this.formRegistro = page.locator('.register-form-container form.list');
 
     // Localizadores de cada campo del formulario
-    this.nombreInput = this.formRegistro.locator('input[name="nombre"]');
-    this.apellidoInput = this.formRegistro.locator('input[name="apellido"]');
-    this.dniInput = this.formRegistro.locator('input[name="dni"]');
+    this.nombreInput = this.formRegistro.locator('input[type="text"][name="nombre"][placeholder="Ingresar Nombre"]');
+    this.apellidoInput = this.formRegistro.locator('input[type="text"][name="apellido"][placeholder="Ingresar Apellido"]');
+    this.dniInput = this.formRegistro.locator('input[type="number"][name="dni"][placeholder="Ingresar DNI"]');
     this.generoSelect = this.formRegistro.locator('select[name="gender"]');
     this.fechaNacimientoInput = this.formRegistro.locator('input[type="date"]');
-    this.emailInput = this.formRegistro.locator('input[placeholder="Ingresar Correo Electrónico"]');
-    this.passwordInput = this.formRegistro.locator('input[name="password"]');
-    this.repetirPasswordInput = this.formRegistro.locator('input[name="password2"]');
-    this.crearCuentaBtn = this.page.locator('a.btn-crear.button, button.btn-crear.button');
+    this.emailInput = this.formRegistro.locator('input[type="email"][name="email"][placeholder="Ingresar Correo Electrónico"]');
+    this.passwordInput = this.formRegistro.locator('input[type="password"][name="password"][placeholder="Ingresar Contraseña"]');
+    this.repetirPasswordInput = this.formRegistro.locator('input[type="password"][name="password2"][placeholder="Repetir Contraseña"]');
+    this.crearCuentaBtn = page.locator('a.btn-crear.button, button.btn-crear.button');
 
     // Subtítulo visible en la pantalla de registro
-    this.subtituloRegistro = page.locator('p.subtitle', {
+    this.subtituloRegistro = page.locator('p.register-subtitle', {
       hasText: 'Coloca tus datos para crear tu cuenta.',
     });
 

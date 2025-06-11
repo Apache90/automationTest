@@ -1,11 +1,11 @@
-import { Encargado } from '../actors/Encargado';
+import { Encargado } from '../../actors/Encargado';
 
-export async function EliminarVendedorPorEmail(encargado: Encargado, email: string) {
+export async function EliminarCanjeadorPorEmail(encargado: Encargado, email: string) {
   const { page } = encargado;
 
   // Encuentra el <li> que contiene el email
-  const liVendedor = page.locator('li.swipeout', { hasText: email });
-  await liVendedor.waitFor({ state: 'visible', timeout: 5000 });
+  const liCanjeador = page.locator('li.swipeout', { hasText: email });
+  await liCanjeador.waitFor({ state: 'visible', timeout: 5000 });
 
   // Encuentra el índice de ese <li> en la lista
   const allLis = page.locator('li.swipeout');
@@ -18,9 +18,9 @@ export async function EliminarVendedorPorEmail(encargado: Encargado, email: stri
       break;
     }
   }
-  if (index === -1) throw new Error('No se encontró el vendedor con el email: ' + email);
+  if (index === -1) throw new Error('No se encontró el canjeador con el email: ' + email);
 
   // En la columna de acciones, busca el botón de eliminar en la misma posición
-  const botonEliminar = page.locator('.col-30 .fa-trash').nth(index).locator('a.button');
+  const botonEliminar = page.locator('i.fa-light.fa-trash').nth(index).locator('div > a.button');
   await botonEliminar.click();
 }

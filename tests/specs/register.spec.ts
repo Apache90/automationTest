@@ -145,4 +145,32 @@ test.describe('Registro de usuario', () => {
     await registerPage.clickCrearCuenta();
     await registerPage.esperarModalConTextoEsperado('Se necesita una foto para el registro');
   });
+
+  test('Error cuando el email ya está registrado', async ({ page }) => {
+  allure.label('owner', 'Emir Segovia');
+  allure.severity('critical');
+  allure.feature('Register');
+  allure.story('Validaciones en registro de cuenta');
+
+  const registerPage = new RegisterPage(page);
+  await registerPage.navigate();
+
+  await registerPage.completarFormulario({
+    nombre: 'Emir',
+    apellido: 'Valles',
+    dni: '30111222',
+    genero: 'Hombre',
+    fechaNacimiento: '1985-03-12',
+    email: 'emirvalles90@gmail.com', // Email ya registrado
+    password: '1234567',
+    repetirPassword: '1234567',
+    fotoPath: 'tests/assets/foto-ejemplo.png',
+  });
+
+  await registerPage.clickCrearCuenta();
+
+  // Verifica el modal de error
+  const modalError = page.locator('.dialog-inner', { hasText: "El email 'emirvalles90@gmail.com' ya está registrado." });
+  await expect(modalError).toBeVisible({ timeout: 10000 });
+});
 });

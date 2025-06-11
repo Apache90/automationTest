@@ -1,5 +1,5 @@
-import { Encargado } from '../actors/Encargado';
-import { VendedorModal } from '../helpers/vendedormodals';
+import { Encargado } from '../../actors/Encargado';
+import { VendedorModal } from '../../helpers/vendedormodals';
 
 export async function agregarNuevoVendedor(encargado: Encargado, email: string) {
   const { page } = encargado;
