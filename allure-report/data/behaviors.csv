@@ -1,8 +1,0 @@
-"BROKEN","EPIC","FAILED","FEATURE","PASSED","SKIPPED","STORY","UNKNOWN"
-"0","","0","Register","5","0","Validaciones en registro de cuenta","0"
-"0","","0","Login","2","0","Credenciales inválidas","0"
-"0","","0","Login","1","0","Olvide mi Contraseña","0"
-"0","","0","","2","0","","0"
-"0","","0","Login","2","0","Validación de campos vacíos","0"
-"0","","0","Login","1","0","Formato de email inválido","0"
-"0","","0","Login","1","0","Autenticación exitosa","0"

@@ -5,7 +5,10 @@
   "scripts": {
     "test": "npx playwright test",
     "allure:generate": "allure generate ./allure-results --clean -o ./allure-report",
-    "allure:open": "allure open ./allure-report"
+    "allure:open": "allure open ./allure-report",
+    "preallure:report": "copy categories.json allure-results\\categories.json",
+    "allure:report": "allure generate allure-results --clean && allure open",
+    "allure:clean": "rd /s /q allure-results && rd /s /q allure-report"
   },
   "keywords": [],
   "author": "",
