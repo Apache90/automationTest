@@ -1,44 +1,48 @@
 import { defineConfig, devices } from '@playwright/test';
 
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
-
-/**
- * See https://playwright.dev/docs/test-configuration.
- */
 export default defineConfig({
   testDir: './tests/specs',
+  
+  // Añadir timeouts explícitos
+  timeout: 60000, // 60 segundos para timeout global
+  expect: {
+    timeout: 10000 // 10 segundos para las aserciones
+  },
+  
   /* Run tests in files in parallel */
   fullyParallel: true,
+  
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
+  
+  /* Retry settings - fixed to 0 to avoid inconsistencias */
+  retries: 0,
+  
+  /* Workers settings */
   workers: process.env.CI ? 1 : undefined,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+  
+  /* Reporter to use */
   reporter: [
-    //['html'], si querés mantener el HTML nativo de Playwright
     ['list'], // List reporter
-    ['allure-playwright'] // Allure reporter
+    // Configuración detallada para Allure
+    ['allure-playwright', {
+      detail: true,
+      outputFolder: 'allure-results',
+      suiteTitle: false
+    }],
+    // Comentario limpio: HTML reporter desactivado
+    // ['html']
   ],
 
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  /* Shared settings for all the projects below */
   use: {
     locale: 'es-ES',
-    /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: 'https://doorsticketdev.com/',
-
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    screenshot: 'only-on-failure' //
+    screenshot: 'only-on-failure',
+    // Añadir video para mejor depuración
+    video: 'on-first-retry'
   },
-
   /* Configure projects for major browsers */
   projects: [
     {
