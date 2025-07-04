@@ -24,6 +24,7 @@ export default defineConfig({
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     //['html'], si querés mantener el HTML nativo de Playwright
+    ['list'], // List reporter
     ['allure-playwright'] // Allure reporter
   ],
 
@@ -35,6 +36,7 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+    screenshot: 'only-on-failure' //
   },
 
   /* Configure projects for major browsers */
