@@ -1,0 +1,36 @@
+Error en test "Error al eliminar cupón QR Pago": Timed out 10000ms waiting for expect(locator).toContainText(expected)
+
+Locator: locator('.dialog.modal-in')
+- Expected string  -  1
++ Received string  + 12
+
+- ¿Estás seguro que deseas eliminar este cupón?
++
++                 
++                     xmark
++                     ¿Estás seguro que deseas eliminar esta lista?
++                 
++             
++                 
++                     
++                         
++                     
++                 
++             Confirmar
+Call log:
+  - Expect "toContainText" with timeout 10000ms
+  - waiting for locator('.dialog.modal-in')
+    13 × locator resolved to <div class="dialog dialog-buttons-1 modal-in">…</div>
+       - unexpected value "
+                
+                    xmark
+                    ¿Estás seguro que deseas eliminar esta lista?
+                
+            
+                
+                    
+                        
+                    
+                
+            Confirmar"
+
