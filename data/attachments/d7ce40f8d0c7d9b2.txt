@@ -1,0 +1,2 @@
+Esperando modal de error con mensaje: "Nombre es requerido"
+Modal de error encontrado correctamente

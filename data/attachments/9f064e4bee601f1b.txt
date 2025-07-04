@@ -1,0 +1,9 @@
+Error en test "Error al editar cupón DNI": expect.toBeVisible: Error: strict mode violation: locator('.grid-container .item-header').filter({ hasText: 'DNI FREE' }).locator('xpath=ancestor::div[contains(@class, "grid-container")]') resolved to 3 elements:
+    1) <div class="grid-container svelte-johsjl">…</div> aka locator('.grid-container').first()
+    2) <div class="grid-container svelte-johsjl">…</div> aka locator('div:nth-child(8) > .list > ul > div:nth-child(3)')
+    3) <div class="grid-container svelte-johsjl">…</div> aka locator('ul > div:nth-child(4)')
+
+Call log:
+  - Expect "toBeVisible" with timeout 5000ms
+  - waiting for locator('.grid-container .item-header').filter({ hasText: 'DNI FREE' }).locator('xpath=ancestor::div[contains(@class, "grid-container")]')
+

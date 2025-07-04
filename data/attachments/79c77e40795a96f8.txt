@@ -1,0 +1,9 @@
+Error en test "Error al editar cupón QR": expect.toBeVisible: Error: strict mode violation: locator('.grid-container').filter({ hasText: 'QR CONSUMIBLE' }) resolved to 3 elements:
+    1) <div class="grid-container svelte-n45bh">…</div> aka locator('.grid-container').first()
+    2) <div class="grid-container svelte-n45bh">…</div> aka locator('div:nth-child(8) > .list > ul > div:nth-child(3)')
+    3) <div class="grid-container svelte-n45bh">…</div> aka locator('ul > div:nth-child(4)')
+
+Call log:
+  - Expect "toBeVisible" with timeout 5000ms
+  - waiting for locator('.grid-container').filter({ hasText: 'QR CONSUMIBLE' })
+
