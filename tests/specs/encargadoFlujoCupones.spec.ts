@@ -12,38 +12,9 @@ import { crearCuponDni } from "../tasks/Encargado/CrearCuponDNI";
 import { crearCuponDniPago } from "../tasks/Encargado/CrearCuponDNIPago";
 import { crearCuponQr } from "../tasks/Encargado/CrearCuponQR";
 import { crearCuponQrPago } from "../tasks/Encargado/CrearCuponQRPago";
-import * as fs from 'fs';
-import * as path from 'path';
 
-// Función de utilidad para reportar errores
 async function reportTestError(error: any, page: Page, testInfo: string) {
   console.error(`Error en test "${testInfo}":`, error.message);
-
-  try {
-    // Asegurar que exista el directorio
-    const errorDir = path.join(process.cwd(), 'test-results', 'errors');
-    if (!fs.existsSync(errorDir)) {
-      fs.mkdirSync(errorDir, { recursive: true });
-    }
-
-    // Capturar screenshot
-    const screenshotPath = path.join(errorDir, `${testInfo.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${Date.now()}.png`);
-    await page.screenshot({ path: screenshotPath, fullPage: true });
-
-    // Añadir a Allure si está disponible
-    try {
-      allure.attachment(
-        `error-screenshot-${Date.now()}.png`,
-        await fs.promises.readFile(screenshotPath),
-        'image/png'
-      );
-    } catch (e) {
-      console.error('Error al adjuntar a Allure:', e);
-      // NO llamar a reportTestError aquí para evitar recursión
-    }
-  } catch (screenshotError) {
-    console.error('Error al capturar screenshot:', screenshotError);
-  }
 }
 
 // Hook global para manejar diálogos
@@ -53,19 +24,6 @@ test.beforeEach(async ({ page }) => {
     await dialog.accept();
   });
 });
-
-// Hook global para capturas en fallos
-test.afterEach(async ({ page }, testInfo) => {
-  if (testInfo.status !== 'passed') {
-    try {
-      const screenshot = await page.screenshot({ fullPage: true });
-      await testInfo.attach('screenshot', { body: screenshot, contentType: 'image/png' });
-    } catch (e) {
-      console.log('No se pudo tomar screenshot:', e);
-    }
-  }
-});
-
 
 // Bloque para Gestión de Cupones
 test.describe("Gestión de Cupones", () => {
