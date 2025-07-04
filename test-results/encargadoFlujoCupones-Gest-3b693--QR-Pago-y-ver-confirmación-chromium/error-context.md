@@ -1,0 +1,39 @@
+# Page snapshot
+
+```yaml
+- link "add":
+  - /url: /manager/71/nuevocuponqr/Pago_QR
+- img "DoorsParty"
+- link "":
+  - /url: "#"
+- button " Volver atrás"
+- text: Cupones QR Pagos 
+- paragraph: Administra tus cupones por grupos.
+- heading "Gestiona tus grupos" [level=1]
+- link "":
+  - /url: /manager/71/modificargrupocupon/Pago_QR
+- list:
+  - listitem:  Ver inactivos
+- list
+- list:
+  - paragraph: Cupones sin grupo
+  - paragraph: Acciones 
+  - listitem:  Pago_QR QR'S PAGO EDIT Test describe
+  - link "":
+    - /url: /manager/71/modificarcuponqr/61750/Pago_QR
+  - text: 
+  - link:
+    - /url: "#"
+  - text: 
+  - link:
+    - /url: "#"
+  - listitem:  Pago_QR QR'S PAGO EDIT Test describe
+  - link "":
+    - /url: /manager/71/modificarcuponqr/61754/Pago_QR
+  - text: 
+  - link:
+    - /url: "#"
+  - text: 
+  - link:
+    - /url: "#"
+```
