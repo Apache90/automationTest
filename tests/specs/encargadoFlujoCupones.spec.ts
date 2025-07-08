@@ -156,6 +156,7 @@ test.describe("Gestión de Cupones", () => {
         throw error;
       }
     });
+    
 
     test("Puede editar un cupón DNI y ver confirmación", async ({ page }) => {
       allure.description(
@@ -201,6 +202,8 @@ test.describe("Gestión de Cupones", () => {
         throw error;
       }
     });
+
+
 
     test("Puede eliminar un cupón DNI y ver confirmación", async ({
       page,
