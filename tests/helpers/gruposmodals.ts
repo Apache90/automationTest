@@ -20,6 +20,25 @@ export class GruposVendedoresModal {
   await this.page.locator('.dialog-button, button, a', { hasText: 'OK' }).first().click();
   }
 
+  async modificarNombreGrupo(nuevoNombre: string) {
+    await this.page.locator('#inputValue').fill(nuevoNombre);
+    await this.page.locator('.dialog-button', { hasText: 'Confirmar' }).click();
+  }
+
+  async esperarModalExito(mensaje: string) {
+    const modal = this.page.locator('.dialog.modal-in');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    await expect(modal.locator('.dialog-text')).toContainText(mensaje);
+    await modal.locator('.dialog-button', { hasText: 'OK' }).click();
+  }
+
+  async esperarModalError(mensaje: string) {
+    const modal = this.page.locator('.dialog.modal-in');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    await expect(modal.locator('.dialog-text')).toContainText(mensaje);
+    await modal.locator('.dialog-button', { hasText: 'OK' }).click();
+  }
+
   async ingresarNombreGrupo(nombre: string) {
     await this.page.locator('#inputValue').fill(nombre);
     await this.page.locator('.dialog-button', { hasText: 'Confirmar' }).click();
