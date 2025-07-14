@@ -115,4 +115,13 @@ test.describe("Gestión de Grupos de Vendedores", () => {
         await expect(nombreVendedor).toBeVisible({ timeout: 5000 });
     });
 
+    //eliminar vendedor de grupo
+
+    //eliminar grupo de vendedores
+
+    //validacion de selector de vendedores
+
+    //validacion de input de nombre de grupo
+    
 });
+
