@@ -7,6 +7,7 @@ export class CuponesDniPage {
   readonly botonAgregarCuponDNI: Locator;
   readonly botonAgregarCuponDNIPago: Locator;
   readonly mensajeSinCupones: Locator;
+  readonly botonGestionarGrupos: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -15,6 +16,7 @@ export class CuponesDniPage {
     this.botonAgregarCuponDNI = page.locator('a[href="/manager/71/nuevocupondni/DNI"] i.material-icons');
     this.botonAgregarCuponDNIPago = page.locator('a[href="/manager/71/nuevocupondni/Pago_DNI"] i.material-icons');
     this.mensajeSinCupones = page.locator("p", { hasText: "No hay cupones disponibles." });
+    this.botonGestionarGrupos = page.locator('a[title="Gestionar grupos"]');
   }
 
   async navegarASeccionDNIs() {
@@ -76,5 +78,10 @@ export class CuponesDniPage {
   async verificarNoHayCupones() {
     await expect(this.mensajeSinCupones).toBeVisible();
     await expect(this.mensajeSinCupones).toHaveText("No hay cupones disponibles.");
+  }
+
+  async clickGestionarGrupos() {
+    await this.botonGestionarGrupos.click();
+    await this.page.waitForURL("**/modificargrupocupon/DNI");
   }
 }
