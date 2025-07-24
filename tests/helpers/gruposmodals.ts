@@ -12,12 +12,12 @@ export class GruposVendedoresModal {
     await this.page.locator('a.smart-select').click();
 
     for (const email of emails) {
-    // Haz click en el label que contiene el email
-    const label = this.page.locator('label.item-checkbox', { hasText: email });
-    await label.click();
-  }
+      // Haz click en el label que contiene el email
+      const label = this.page.locator('label.item-checkbox', { hasText: email });
+      await label.click();
+    }
     // Click en el botón OK para cerrar el popover
-  await this.page.locator('.dialog-button, button, a', { hasText: 'OK' }).first().click();
+    await this.page.locator('.dialog-button, button, a', { hasText: 'OK' }).first().click();
   }
 
   async modificarNombreGrupo(nuevoNombre: string) {
@@ -47,5 +47,63 @@ export class GruposVendedoresModal {
   async esperarConfirmacion(nombre: string) {
     await expect(this.page.locator('.dialog.modal-in')).toContainText(`Grupo de vendedores: ${nombre}, agregado correctamente.`);
     await this.page.locator('.dialog-button', { hasText: 'OK' }).click();
+  }
+
+  async confirmarEliminacionVendedor() {
+    // Esperar el modal de confirmación de eliminación
+    const modal = this.page.locator('.dialog.modal-in');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    await expect(modal.locator('.dialog-text')).toContainText('¿Estás seguro que deseas eliminar este Vendedor?');
+
+    // Hacer click en "Confirmar"
+    const confirmar = modal.locator('.dialog-button', { hasText: 'Confirmar' });
+    await confirmar.click();
+  }
+
+  async esperarModalEliminacionVendedorExitosa() {
+    // Esperar el modal de éxito
+    const modal = this.page.locator('.dialog.modal-in');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    await expect(modal.locator('.dialog-text')).toContainText('Vendedor retirado con éxito');
+
+    // Hacer click en "OK"
+    const ok = modal.locator('.dialog-button', { hasText: 'OK' });
+    await ok.click();
+  }
+
+  async esperarModalEliminacionGrupoExitosa() {
+    // Esperar el modal de éxito
+    const modal = this.page.locator('.dialog.modal-in');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    await expect(modal.locator('.dialog-title')).toContainText('DOORS');
+    await expect(modal.locator('.dialog-text')).toContainText('Grupo eliminado con éxito');
+
+    // Hacer click en "OK"
+    const ok = modal.locator('.dialog-button', { hasText: 'OK' });
+    await ok.click();
+  }
+
+  async esperarModalErrorSinVendedores(mensaje: string) {
+    // Esperar el modal de error
+    const modal = this.page.locator('.dialog.modal-in');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    await expect(modal.locator('.dialog-title')).toContainText('DOORS');
+    await expect(modal.locator('.dialog-text')).toContainText(mensaje);
+
+    // Hacer click en "OK"
+    const ok = modal.locator('.dialog-button', { hasText: 'OK' });
+    await ok.click();
+  }
+
+  async esperarModalErrorSinNombre(mensaje: string) {
+    // Esperar el modal de error
+    const modal = this.page.locator('.dialog.modal-in');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    await expect(modal.locator('.dialog-title')).toContainText('DOORS');
+    await expect(modal.locator('.dialog-text')).toContainText(mensaje);
+    
+    // Hacer click en "OK"
+    const ok = modal.locator('.dialog-button', { hasText: 'OK' });
+    await ok.click();
   }
 }
