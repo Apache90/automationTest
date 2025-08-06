@@ -84,4 +84,27 @@ export class GruposCuponesModal {
     const ok = modal.locator('.dialog-button', { hasText: 'OK' });
     await ok.click();
   }
+
+  async confirmarEliminacionCuponDeGrupo() {
+    // Esperar el modal de confirmación
+    const modalConfirmacion = this.page.locator('.dialog.dialog-buttons-1.custom-dialog-background.modal-in');
+    await expect(modalConfirmacion).toBeVisible({ timeout: 5000 });
+    await expect(modalConfirmacion.locator('.dialog-title .btnCustomDialogTitle')).toContainText('DOORS');
+    await expect(modalConfirmacion.locator('.dialog-text .btnCustomDialogSubtitle')).toContainText('¿Esta seguro que quiere eliminar este cupón del grupo?');
+
+    // Click en "Confirmar"
+    await modalConfirmacion.locator('.dialog-button', { hasText: 'Confirmar' }).click();
+  }
+
+  async esperarModalExitoCuponEliminado() {
+    // Esperar el modal de éxito al eliminar cupón
+    const modal = this.page.locator('.dialog.dialog-buttons-1.modal-in');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    await expect(modal.locator('.dialog-title')).toContainText('DOORS');
+    await expect(modal.locator('.dialog-text')).toContainText('Cupón eliminado del grupo con éxito');
+
+    // Hacer click en "OK"
+    const ok = modal.locator('.dialog-button', { hasText: 'OK' });
+    await ok.click();
+  }
 }
