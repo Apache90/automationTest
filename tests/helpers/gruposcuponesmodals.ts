@@ -72,4 +72,16 @@ export class GruposCuponesModal {
     const ok = modal.locator('.dialog-button', { hasText: 'OK' });
     await ok.click();
   }
+
+  async esperarModalExitoCuponAgregado() {
+    // Esperar el modal de éxito al agregar cupón
+    const modal = this.page.locator('.dialog.dialog-buttons-1.modal-in');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    await expect(modal.locator('.dialog-title')).toContainText('DOORS');
+    await expect(modal.locator('.dialog-text')).toContainText('Cupon agregado correctamente');
+
+    // Hacer click en "OK"
+    const ok = modal.locator('.dialog-button', { hasText: 'OK' });
+    await ok.click();
+  }
 }
