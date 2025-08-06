@@ -107,4 +107,13 @@ export class GruposCuponesModal {
     const ok = modal.locator('.dialog-button', { hasText: 'OK' });
     await ok.click();
   }
+
+  async esperarModalExitoGrupoEliminado() {
+    const modal = this.page.locator('.dialog.dialog-buttons-1.modal-in');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    await expect(modal.locator('.dialog-title')).toContainText('DOORS');
+    await expect(modal.locator('.dialog-text')).toContainText('Grupo eliminado con éxito');
+    await modal.locator('.dialog-button', { hasText: 'OK' }).click();
+  }
+  
 }

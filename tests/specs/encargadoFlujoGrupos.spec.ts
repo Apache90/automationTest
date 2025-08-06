@@ -16,6 +16,7 @@ import { modificarNombreGrupoCuponesDni, modificarNombreGrupoCuponesDniVacio } f
 import { agregarCuponAGrupoDni } from "../tasks/Encargado/AgregarCuponAGrupoDni";
 import { eliminarCuponDeGrupoDni } from "../tasks/Encargado/EliminarCuponDeGrupoDni";
 import { GruposCuponesModal } from "../helpers/gruposcuponesmodals";
+import { eliminarGrupoCuponesDni } from "../tasks/Encargado/EliminarGrupoCuponesDni";
 
 test.describe("Gestión de Grupos de Vendedores", () => {
     test.describe.configure({ mode: "serial" });
@@ -313,6 +314,22 @@ test.describe("Gestion de Grupos de Cupones", () => {
 
             // Eliminar cupón del grupo
             await eliminarCuponDeGrupoDni(encargado, "GRUPO CUPONES DNI 2", "DNI GRUPO TEST");
+        });
+
+        test("Puede eliminar un grupo de cupones DNI y ver confirmación", async ({ page }) => {
+            allure.description("Verifica que un encargado pueda eliminar un grupo de cupones DNI y reciba confirmación de éxito");
+            allure.severity("critical");
+
+            const encargado = new Encargado(page);
+
+            // Login y selección de rol
+            await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+            await page.waitForLoadState("networkidle");
+            await seleccionarRolGeneral(encargado);
+            await page.waitForLoadState("networkidle");
+
+            // Eliminar grupo
+            await eliminarGrupoCuponesDni(encargado, "GRUPO CUPONES DNI 2");
         });
 
 
