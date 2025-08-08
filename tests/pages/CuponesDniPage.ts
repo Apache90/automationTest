@@ -84,4 +84,9 @@ export class CuponesDniPage {
     await this.botonGestionarGrupos.click();
     await this.page.waitForURL("**/modificargrupocupon/DNI");
   }
+
+  async clickGestionarGruposDniPago() {
+    await this.botonGestionarGrupos.click();
+    await this.page.waitForURL("**/modificargrupocupon/Pago_DNI");
+  }
 }

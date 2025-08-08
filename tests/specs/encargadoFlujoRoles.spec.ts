@@ -40,7 +40,7 @@ test.describe("Gestión de Roles", () => {
       allure.story("Gestión de Vendedores");
     });
 
-    const email = "vendedor3@gmail.com";
+    const email = "emirvalles90@gmail.com";
 
     test("Puede agregar un nuevo vendedor y ver confirmación", async ({
       page,

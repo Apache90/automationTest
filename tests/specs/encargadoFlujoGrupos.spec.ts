@@ -7,16 +7,16 @@ import { GruposVendedoresModal } from "../helpers/gruposmodals";
 import { VendedorModal } from "../helpers/vendedormodals";
 import { modificarNombreGrupoVendedores, modificarNombreGrupoVacio } from "../tasks/Encargado/ModificarNombreGrupoVendedores";
 import { allure } from "allure-playwright";
-import { crearGrupoCuponesDni } from "../tasks/Encargado/CrearCuponDNI";
+import { crearGrupoCuponesDni, crearGrupoCuponesDniPago } from "../tasks/Encargado/CrearCuponDNI";
 import { eliminarVendedorDeGrupo } from "../tasks/Encargado/EliminarVendedorDeGrupo";
 import { eliminarGrupoVendedores } from "../tasks/Encargado/EliminarGrupoVendedores";
 import { intentarCrearGrupoSinVendedores } from "../tasks/Encargado/IntentarCrearGrupoSinVendedores";
 import { intentarCrearGrupoSinNombre } from "../tasks/Encargado/IntentarCrearGrupoSinNombre";
-import { modificarNombreGrupoCuponesDni, modificarNombreGrupoCuponesDniVacio } from "../tasks/Encargado/ModificarNombreGrupoCuponesDni";
-import { agregarCuponAGrupoDni } from "../tasks/Encargado/AgregarCuponAGrupoDni";
-import { eliminarCuponDeGrupoDni } from "../tasks/Encargado/EliminarCuponDeGrupoDni";
+import { modificarNombreGrupoCuponesDni, modificarNombreGrupoCuponesDniPagoVacio, modificarNombreGrupoCuponesDniVacio, modificarNombreGrupoCuponesDniPago } from "../tasks/Encargado/ModificarNombreGrupoCuponesDni";
+import { agregarCuponAGrupoDni, agregarCuponAGrupoDniPago } from "../tasks/Encargado/AgregarCuponAGrupoDni";
+import { eliminarCuponDeGrupoDni, eliminarCuponDeGrupoDniPago } from "../tasks/Encargado/EliminarCuponDeGrupoDni";
 import { GruposCuponesModal } from "../helpers/gruposcuponesmodals";
-import { eliminarGrupoCuponesDni } from "../tasks/Encargado/EliminarGrupoCuponesDni";
+import { eliminarGrupoCuponesDni, eliminarGrupoCuponesDniPago } from "../tasks/Encargado/EliminarGrupoCuponesDni";
 
 test.describe("Gestión de Grupos de Vendedores", () => {
     test.describe.configure({ mode: "serial" });
@@ -335,15 +335,122 @@ test.describe("Gestion de Grupos de Cupones", () => {
 
     });
 
-    test.describe("DNI'sPAGO", () => {
-        // Aquí irán los tests de DNI PAGO
+    test.describe("Grupo DNIsPago", () => {
+        test("Puede crear un grupo de cupones DNIsPago y ver confirmación", async ({ page }) => {
+            allure.description("Verifica que un encargado pueda crear un grupo de cupones DNIsPago y recibir confirmación de éxito");
+            allure.severity("critical");
+
+            const encargado = new Encargado(page);
+            await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+            await page.waitForLoadState("networkidle");
+            await seleccionarRolGeneral(encargado);
+            await page.waitForLoadState("networkidle");
+
+            await crearGrupoCuponesDniPago(encargado);
+        });
+
+        test("Muestra error si no se ingresa nombre al modificar grupo de cupones DNIsPago", async ({ page }) => {
+            allure.description("Verifica que se muestre un error si no se ingresa nombre al modificar el grupo de cupones DNIsPago");
+            allure.severity("normal");
+
+            const encargado = new Encargado(page);
+            const grupoModal = new GruposCuponesModal(page);
+
+            await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+            await page.waitForLoadState("networkidle");
+            await seleccionarRolGeneral(encargado);
+            await page.waitForLoadState("networkidle");
+
+            // Intentar modificar nombre sin ingresar nuevo nombre
+            await modificarNombreGrupoCuponesDniPagoVacio(encargado, "GRUPO CUPONES DNI PAGO");
+
+            // Esperar modal de error
+            await grupoModal.esperarModalErrorSinNombre("Nuevo nombre de grupo es requerido");
+        });
+
+        test("Puede modificar el nombre del grupo de cupones DNIsPago y ver confirmación", async ({ page }) => {
+            allure.description("Verifica que un encargado pueda modificar el nombre de un grupo de cupones DNI y reciba confirmación de éxito");
+            allure.severity("critical");
+
+            const encargado = new Encargado(page);
+            const grupoModal = new GruposCuponesModal(page);
+
+            await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+            await page.waitForLoadState("networkidle");
+            await seleccionarRolGeneral(encargado);
+            await page.waitForLoadState("networkidle");
+
+            // Modificar nombre del grupo
+            await modificarNombreGrupoCuponesDniPago(encargado, "GRUPO CUPONES DNI", "GRUPO CUPONES DNI 2");
+
+            // Esperar modal de éxito
+            await grupoModal.esperarModalExitoModificacion("Grupo modificado con éxito");
+
+            // Verificar que el nombre se cambió en la lista
+            const grupoEnLista = page.locator('.list.accordion-list ul li.accordion-item .item-title', { hasText: "GRUPO CUPONES DNI 2" });
+            await expect(grupoEnLista).toBeVisible({ timeout: 5000 });
+        });
+
+        test("Puede agregar un nuevo cupón a un grupo de cupones DNIsPago y ver confirmación", async ({ page }) => {
+            allure.description("Verifica que un encargado pueda agregar un nuevo cupón a un grupo de cupones DNIsPago existente y reciba confirmación de éxito");
+            allure.severity("critical");
+
+            const encargado = new Encargado(page);
+            const grupoModal = new GruposCuponesModal(page);
+
+            // Login y selección de rol
+            await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+            await page.waitForLoadState("networkidle");
+            await seleccionarRolGeneral(encargado);
+            await page.waitForLoadState("networkidle");
+
+            // Agregar cupón al grupo
+            await agregarCuponAGrupoDniPago(encargado, "GRUPO CUPONES DNI 2", "DNI PAGO GRUPO TEST 2");
+
+            // Verificar modal de éxito
+            await grupoModal.esperarModalExitoCuponAgregado();
+        });
+
+        test("Puede eliminar un cupón de un grupo de cupones DNIsPago y ver confirmación", async ({ page }) => {
+            allure.description("Verifica que un encargado pueda eliminar un cupón de un grupo de cupones DNIsPago existente y reciba confirmación de éxito");
+            allure.severity("critical");
+
+            const encargado = new Encargado(page);
+
+            // Login y selección de rol
+            await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+            await page.waitForLoadState("networkidle");
+            await seleccionarRolGeneral(encargado);
+            await page.waitForLoadState("networkidle");
+
+            // Eliminar cupón del grupo
+            await eliminarCuponDeGrupoDniPago(encargado, "GRUPO CUPONES DNI 2", "DNI PAGO GRUPO TEST");
+        });
+
+        test("Puede eliminar un grupo de cupones DNIsPago y ver confirmación", async ({ page }) => {
+            allure.description("Verifica que un encargado pueda eliminar un grupo de cupones DNIsPago y reciba confirmación de éxito");
+            allure.severity("critical");
+
+            const encargado = new Encargado(page);
+
+            // Login y selección de rol
+            await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+            await page.waitForLoadState("networkidle");
+            await seleccionarRolGeneral(encargado);
+            await page.waitForLoadState("networkidle");
+
+            // Eliminar grupo
+            await eliminarGrupoCuponesDniPago(encargado, "GRUPO CUPONES DNI 2");
+        });
+
+
     });
 
-    test.describe("QR's", () => {
-        // Aquí irán los tests de QR's
+    test.describe("Grupo QRs", () => {
+        
     });
 
-    test.describe("QR's PAGO", () => {
+    test.describe("Grupo QRsPago", () => {
         // Aquí irán los tests de QR's PAGO
     });
 });

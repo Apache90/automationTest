@@ -32,8 +32,8 @@ test.describe("Gestión de Cupones", () => {
     allure.feature("Gestión de Cupones");
   });
 
-  // Subsección de DNI's
-  test.describe("DNI's", () => {
+  // Subsección de DNIs
+  test.describe("DNIs", () => {
 
     // Configuración para ejecutar pruebas en serie
     test.describe.configure({ mode: "serial" });
@@ -250,12 +250,12 @@ test.describe("Gestión de Cupones", () => {
   });
 
   // Subsección de DNI's Pago
-  test.describe("DNI's Pago", () => {
+  test.describe("DNIsPago", () => {
     // Configuración para ejecutar pruebas en serie
     test.describe.configure({ mode: "serial" });
 
     test.beforeEach(() => {
-      allure.story("Cupones DNI's Pago");
+      allure.story("Cupones DNIsPago");
     });
 
     test("Muestra error cuando no se ingresa el nombre del cupón de pago", async ({
