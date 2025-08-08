@@ -1,4 +1,0 @@
-Error en test "Error en test de validación de precio en DNI Pago": page.goto: Test timeout of 60000ms exceeded.
-Call log:
-  - navigating to "https://doorsticketsdev.com/#!/login/", waiting until "load"
-
