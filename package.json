@@ -9,6 +9,8 @@
     "test:headed": "npx playwright test --headed --workers=1",
     "test:debug": "npx playwright test --debug --workers=1",
     "test:specific": "npx playwright test --workers=1 --grep",
+    "run:tests": "node scripts/run-tests-only.js",
+    "publish:report": "node scripts/publish-report-only.js",
     "regression:custom": "npx ts-node scripts/regression-runner.ts",
     "regression:ordered": "node scripts/regression-ordered.js",
     "allure:generate": "allure generate ./allure-results --clean -o ./allure-report",
