@@ -9,8 +9,8 @@ export default defineConfig({
     timeout: 10000 // 10 segundos para las aserciones
   },
   
-  /* Run tests in files in parallel */
-  fullyParallel: true,
+  /* Run tests in files in parallel - DISABLED for regression to avoid conflicts */
+  fullyParallel: false,
   
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
@@ -18,8 +18,8 @@ export default defineConfig({
   /* Retry settings - fixed to 0 to avoid inconsistencias */
   retries: 0,
   
-  /* Workers settings */
-  workers: process.env.CI ? 1 : undefined,
+  /* Workers settings - Force 1 worker for serial execution */
+  workers: 1,
   
   /* Reporter to use */
   reporter: [

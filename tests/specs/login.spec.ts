@@ -1,13 +1,24 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
 import { cerrarModalSiExiste } from '../helpers/loginmodals';
+import { CommonHelpers } from '../helpers/CommonHelpers';
+import { TestConfig } from '../config/TestConfig';
 import { allure } from 'allure-playwright';
 
 test.describe('Tests del login', () => {
 
+    // Configurar modo serial para evitar conflictos
+    test.describe.configure({ mode: "serial" });
+
     test.beforeEach(async ({ page }) => {
+        // Configurar manejo de diálogos
+        CommonHelpers.setupDialogHandler(page);
+        
         const loginPage = new LoginPage(page);
         await loginPage.navigate();
+        
+        // Esperar a que la página cargue completamente
+        await CommonHelpers.waitForPageLoad(page);
     });
 
     test('Debe mostrar error si no se ingresa el email', async ({ page }) => {

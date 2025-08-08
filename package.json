@@ -4,11 +4,20 @@
   "main": "index.js",
   "scripts": {
     "test": "npx playwright test",
+    "test:regression": "npx playwright test --workers=1",
+    "test:serial": "npx playwright test --workers=1 --reporter=line",
+    "test:headed": "npx playwright test --headed --workers=1",
+    "test:debug": "npx playwright test --debug --workers=1",
+    "test:specific": "npx playwright test --workers=1 --grep",
+    "regression:custom": "npx ts-node scripts/regression-runner.ts",
+    "regression:ordered": "node scripts/regression-ordered.js",
     "allure:generate": "allure generate ./allure-results --clean -o ./allure-report",
     "allure:open": "allure open ./allure-report",
     "preallure:report": "copy categories.json allure-results\\categories.json",
     "allure:report": "allure generate allure-results --clean && allure open",
-    "allure:clean": "rd /s /q allure-results && rd /s /q allure-report"
+    "allure:clean": "powershell -Command \"if (Test-Path 'allure-results') { Remove-Item -Path 'allure-results' -Recurse -Force }; if (Test-Path 'allure-report') { Remove-Item -Path 'allure-report' -Recurse -Force }\"",
+    "test:and:publish": "node scripts/test-and-publish.js",
+    "regression:and:publish": "node scripts/regression-and-publish.js"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +26,8 @@
   "devDependencies": {
     "@playwright/test": "^1.53.2",
     "@types/node": "^22.15.24",
-    "allure-playwright": "^3.3.0"
+    "allure-playwright": "^3.3.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
   }
 }
