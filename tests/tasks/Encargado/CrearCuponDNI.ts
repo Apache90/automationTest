@@ -133,12 +133,12 @@ export async function crearGrupoCuponesDniPago(encargado: Encargado) {
   await grupoModal.seleccionarCupon("DNI PAGO GRUPO TEST");
 
   // Ingresar nombre del grupo y confirmar
-  await grupoModal.ingresarNombreGrupo("GRUPO CUPONES PAGO");
+  await grupoModal.ingresarNombreGrupo("GRUPO CUPONES DNI PAGO");
 
   // Esperar confirmación
-  await grupoModal.esperarModalExito("GRUPO CUPONES PAGO");
+  await grupoModal.esperarModalExito("GRUPO CUPONES DNI PAGO");
 
   // Validar grupo en la lista
-  const grupoEnLista = page.locator('.list.accordion-list ul li.accordion-item .item-title', { hasText: "GRUPO CUPONES PAGO" });
+  const grupoEnLista = page.locator('.list.accordion-list ul li.accordion-item .item-title', { hasText: "GRUPO CUPONES DNI PAGO" });
   await expect(grupoEnLista).toBeVisible({ timeout: 5000 });
 }
