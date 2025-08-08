@@ -262,6 +262,16 @@ Este sitio contiene los reportes de automatización.
     });
   }
 
+  async getCurrentBranch() {
+    try {
+      const result = await this.execCommand('git branch --show-current');
+      return result.trim();
+    } catch (error) {
+      console.error('Error obteniendo rama actual:', error.message);
+      return 'unknown';
+    }
+  }
+
   async ensureNodeModules() {
     console.log('🔍 Verificando dependencias...');
     
