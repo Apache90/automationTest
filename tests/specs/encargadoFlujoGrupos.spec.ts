@@ -8,6 +8,9 @@ import { VendedorModal } from "../helpers/vendedormodals";
 import { modificarNombreGrupoVendedores, modificarNombreGrupoVacio } from "../tasks/Encargado/ModificarNombreGrupoVendedores";
 import { allure } from "allure-playwright";
 import { crearGrupoCuponesDni, crearGrupoCuponesDniPago } from "../tasks/Encargado/CrearCuponDNI";
+import { crearGrupoCuponesQr } from "../tasks/Encargado/CrearCuponQr";
+import { modificarNombreGrupoCuponesQr, modificarNombreGrupoCuponesQrVacio } from "../tasks/Encargado/ModificarNombreGrupoCuponesQr";
+import { agregarCuponAGrupoQr } from "../tasks/Encargado/AgregarCuponAGrupoQr";
 import { eliminarVendedorDeGrupo } from "../tasks/Encargado/EliminarVendedorDeGrupo";
 import { eliminarGrupoVendedores } from "../tasks/Encargado/EliminarGrupoVendedores";
 import { intentarCrearGrupoSinVendedores } from "../tasks/Encargado/IntentarCrearGrupoSinVendedores";
@@ -447,7 +450,84 @@ test.describe("Gestion de Grupos de Cupones", () => {
     });
 
     test.describe("Grupo QRs", () => {
-        
+        test.describe.configure({ mode: "serial" });
+
+        test("Puede crear un grupo de cupones QR y ver confirmación", async ({ page }) => {
+            allure.description("Verifica que un encargado pueda crear un grupo de cupones QR y recibir confirmación de éxito");
+            allure.severity("critical");
+
+            const encargado = new Encargado(page);
+            await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+            await page.waitForLoadState("networkidle");
+            await seleccionarRolGeneral(encargado);
+            await page.waitForLoadState("networkidle");
+
+            await crearGrupoCuponesQr(encargado);
+        });
+
+        test("Puede modificar el nombre del grupo de cupones QR y ver confirmación", async ({ page }) => {
+            allure.description("Verifica que un encargado pueda modificar el nombre de un grupo de cupones QR y reciba confirmación de éxito");
+            allure.severity("critical");
+
+            const encargado = new Encargado(page);
+            const grupoModal = new GruposCuponesModal(page);
+
+            await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+            await page.waitForLoadState("networkidle");
+            await seleccionarRolGeneral(encargado);
+            await page.waitForLoadState("networkidle");
+
+            // Modificar nombre del grupo
+            await modificarNombreGrupoCuponesQr(encargado, "GRUPO DE CUPONES QRS", "GRUPO QRS MODIF");
+
+            // Esperar modal de éxito
+            await grupoModal.esperarModalExitoModificacion("Grupo modificado con éxito");
+
+            // Verificar que el nombre se cambió en la lista
+            const grupoEnLista = page.locator('.list.accordion-list ul li.accordion-item .item-title', { hasText: "GRUPO QRS MODIF" });
+            await expect(grupoEnLista).toBeVisible({ timeout: 5000 });
+        });
+
+        test("Muestra error si no se ingresa nombre al modificar grupo de cupones QR", async ({ page }) => {
+            allure.description("Verifica que se muestre un error si no se ingresa nombre al modificar el grupo de cupones QR");
+            allure.severity("normal");
+
+            const encargado = new Encargado(page);
+            const grupoModal = new GruposCuponesModal(page);
+
+            await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+            await page.waitForLoadState("networkidle");
+            await seleccionarRolGeneral(encargado);
+            await page.waitForLoadState("networkidle");
+
+            // Intentar modificar nombre sin ingresar nuevo nombre
+            await modificarNombreGrupoCuponesQrVacio(encargado, "GRUPO QRS MODIF");
+
+            // Esperar modal de error
+            await grupoModal.esperarModalErrorSinNombre("Nuevo nombre de grupo es requerido");
+        });
+
+        test("Puede agregar un nuevo cupón a un grupo de cupones QR y ver confirmación", async ({ page }) => {
+            allure.description("Verifica que un encargado pueda agregar un nuevo cupón a un grupo de cupones QR existente y reciba confirmación de éxito");
+            allure.severity("critical");
+
+            const encargado = new Encargado(page);
+            const grupoModal = new GruposCuponesModal(page);
+
+            // Login y selección de rol
+            await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+            await page.waitForLoadState("networkidle");
+            await seleccionarRolGeneral(encargado);
+            await page.waitForLoadState("networkidle");
+
+            // Agregar cupón al grupo
+            await agregarCuponAGrupoQr(encargado, "GRUPO QRS MODIF", "QR GRUPO TEST 2");
+
+            // Verificar modal de éxito
+            await grupoModal.esperarModalExitoCuponAgregado();
+        });
+
+
     });
 
     test.describe("Grupo QRsPago", () => {

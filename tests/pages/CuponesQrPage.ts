@@ -63,4 +63,12 @@ export class CuponesQrPage {
   async verificarNoHayCupones() {
     await expect(this.mensajeSinCupones).toBeVisible({ timeout: 5000 });
   }
+
+  async clickGestionarGruposQR() {
+    // Click en el botón para gestionar grupos de QR
+    const botonGestionarGrupos = this.page.locator('a[href="/manager/71/modificargrupocupon/QR"] i.fa-ticket');
+    await expect(botonGestionarGrupos).toBeVisible({ timeout: 5000 });
+    await botonGestionarGrupos.click();
+    await this.page.waitForURL("**/#!/manager/71/modificargrupocupon/QR");
+  }
 }
