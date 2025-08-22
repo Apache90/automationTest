@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 import { Encargado } from '../../actors/Encargado';
 import { CuponesDniPage } from '../../pages/CuponesDniPage';
 import { CrearCuponDniPage } from '../../pages/CrearCuponDniPage';
-import { CuponModals } from '../../helpers/CuponModals';
+import { CuponModals } from '../../helpers/cuponmodals';
 import { GruposCuponesModal } from "../../helpers/gruposcuponesmodals";
 
 

@@ -71,4 +71,12 @@ export class CuponesQrPage {
     await botonGestionarGrupos.click();
     await this.page.waitForURL("**/#!/manager/71/modificargrupocupon/QR");
   }
+
+  async clickGestionarGruposQRPago() {
+    // Click en el botón para gestionar grupos de QR Pago
+    const botonGestionarGrupos = this.page.locator('a[href="/manager/71/modificargrupocupon/Pago_QR"] i.fa-ticket');
+    await expect(botonGestionarGrupos).toBeVisible({ timeout: 5000 });
+    await botonGestionarGrupos.click();
+    await this.page.waitForURL("**/#!/manager/71/modificargrupocupon/Pago_QR");
+  }
 }

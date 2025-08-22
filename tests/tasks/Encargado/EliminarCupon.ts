@@ -2,7 +2,7 @@ import { Page } from '@playwright/test';
 import { Encargado } from '../../actors/Encargado';
 import { CuponesDniPage } from '../../pages/CuponesDniPage';
 import { CuponesQrPage } from '../../pages/CuponesQrPage';
-import { CuponModals } from '../../helpers/CuponModals';
+import { CuponModals } from '../../helpers/cuponmodals';
 
 export async function eliminarCupon(
   encargado: Encargado,
