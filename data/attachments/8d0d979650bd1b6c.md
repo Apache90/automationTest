@@ -1,0 +1,41 @@
+# Page snapshot
+
+```yaml
+- link "add":
+  - /url: /manager/71/nuevocuponqr/QR
+- img "DoorsParty"
+- link "":
+  - /url: "#"
+- button " Volver atrás"
+- text: Cupones QR Consumibles | Virales 
+- paragraph: Administra tus cupones por grupos.
+- heading "Gestiona tus grupos" [level=1]
+- link "":
+  - /url: /manager/71/modificargrupocupon/QR
+- list:
+  - listitem:  Ver inactivos
+- list:
+  - paragraph: GRUPO QRS MODIF
+  - paragraph: Acciones 
+  - listitem:  Consumible_QR QR GRUPO TEST Test descripcion QR
+  - link "":
+    - /url: /manager/71/modificarcuponqr/61788/QR
+  - text: 
+  - link:
+    - /url: "#"
+  - text: 
+  - link:
+    - /url: "#"
+  - listitem:  Consumible_QR QR GRUPO TEST 2 Test descripcion QR 2
+  - link "":
+    - /url: /manager/71/modificarcuponqr/61789/QR
+  - text: 
+  - link:
+    - /url: "#"
+  - text: 
+  - link:
+    - /url: "#"
+- list:
+  - paragraph: Cupones sin grupo
+  - paragraph: Acciones 
+```
