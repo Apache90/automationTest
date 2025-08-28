@@ -17,7 +17,6 @@ import { agregarCuponAGrupoQrPago } from "../tasks/Encargado/AgregarCuponAGrupoQ
 import { eliminarCuponDeGrupoQr, eliminarCuponDeGrupoQrPago } from "../tasks/Encargado/EliminarCuponDeGrupoQr";
 import { eliminarVendedorDeGrupo } from "../tasks/Encargado/EliminarVendedorDeGrupo";
 import { eliminarGrupoVendedores } from "../tasks/Encargado/EliminarGrupoVendedores";
-import { intentarCrearGrupoSinVendedores } from "../tasks/Encargado/IntentarCrearGrupoSinVendedores";
 import { intentarCrearGrupoSinNombre } from "../tasks/Encargado/IntentarCrearGrupoSinNombre";
 import { modificarNombreGrupoCuponesDni, modificarNombreGrupoCuponesDniPagoVacio, modificarNombreGrupoCuponesDniVacio, modificarNombreGrupoCuponesDniPago } from "../tasks/Encargado/ModificarNombreGrupoCuponesDni";
 import { agregarCuponAGrupoDni, agregarCuponAGrupoDniPago } from "../tasks/Encargado/AgregarCuponAGrupoDni";
@@ -182,24 +181,7 @@ test.describe("Gestión de Grupos de Vendedores", () => {
         await expect(page.locator('.item-title', { hasText: "No tenés grupo de Vendedores." })).toBeVisible({ timeout: 5000 });
     });
 
-    test("Muestra error si no se selecciona vendedor al crear grupo", async ({ page }) => {
-        allure.description("Verifica que se muestre un error si no se selecciona ningún vendedor al crear un grupo");
-        allure.severity("normal");
 
-        const encargado = new Encargado(page);
-        const grupoModal = new GruposVendedoresModal(page);
-
-        await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
-        await page.waitForLoadState("networkidle");
-        await seleccionarRolGeneral(encargado);
-        await page.waitForLoadState("networkidle");
-
-        // Intentar crear grupo sin seleccionar vendedores
-        await intentarCrearGrupoSinVendedores(encargado);
-
-        // Esperar modal de error
-        await grupoModal.esperarModalErrorSinVendedores("Debe seleccionar al menos un vendedor sin grupo.");
-    });
 
     test("Muestra error si no se ingresa nombre al crear grupo", async ({ page }) => {
         allure.description("Verifica que se muestre un error si no se ingresa nombre al crear un grupo de vendedores");

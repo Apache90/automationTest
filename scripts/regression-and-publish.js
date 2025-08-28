@@ -61,8 +61,8 @@ class RegressionPublisher {
     const testOrder = [
       'register.spec.ts',
       'login.spec.ts', 
-      'encargadoFlujoRoles.spec.ts',
       'encargadoFlujoCupones.spec.ts',
+      'encargadoFlujoRoles.spec.ts',
       'encargadoFlujoGrupos.spec.ts'
     ];
 

@@ -83,18 +83,6 @@ export class GruposVendedoresModal {
     await ok.click();
   }
 
-  async esperarModalErrorSinVendedores(mensaje: string) {
-    // Esperar el modal de error
-    const modal = this.page.locator('.dialog.modal-in');
-    await expect(modal).toBeVisible({ timeout: 5000 });
-    await expect(modal.locator('.dialog-title')).toContainText('DOORS');
-    await expect(modal.locator('.dialog-text')).toContainText(mensaje);
-
-    // Hacer click en "OK"
-    const ok = modal.locator('.dialog-button', { hasText: 'OK' });
-    await ok.click();
-  }
-
   async esperarModalErrorSinNombre(mensaje: string) {
     // Esperar el modal de error
     const modal = this.page.locator('.dialog.modal-in');

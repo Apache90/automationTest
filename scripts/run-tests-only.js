@@ -15,9 +15,9 @@ class TestRunner {
     this.testOrder = [
       'tests/specs/register.spec.ts',
       'tests/specs/login.spec.ts', 
-      'tests/specs/encargadoFlujoRoles.spec.ts',
       'tests/specs/encargadoFlujoCupones.spec.ts',
-      'tests/specs/encargadoFlujoGrupos.spec.ts'
+      'tests/specs/encargadoFlujoGrupos.spec.ts',
+      'tests/specs/encargadoFlujoRoles.spec.ts'
     ];
   }
 
