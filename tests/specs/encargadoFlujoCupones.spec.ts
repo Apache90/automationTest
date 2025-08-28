@@ -4,14 +4,14 @@ import { seleccionarRolGeneral } from "../tasks/SeleccionarRol";
 import { allure } from "allure-playwright";
 import { CuponesDniPage } from "../pages/CuponesDniPage";
 import { CrearCuponDniPage } from "../pages/CrearCuponDniPage";
-import { CuponModals } from "../helpers/CuponModals";
+import { CuponModals } from "../helpers/cuponmodals";
 import { ModificarCuponPage } from "../pages/ModificarCuponPage";
 import { CuponesQrPage } from "../pages/CuponesQrPage";
 import { CrearCuponQrPage } from "../pages/CrearCuponQrPage";
 import { crearCuponDni } from "../tasks/Encargado/CrearCuponDNI";
-import { crearCuponDniPago } from "../tasks/Encargado/CrearCuponDNIPago";
-import { crearCuponQr } from "../tasks/Encargado/CrearCuponQR";
-import { crearCuponQrPago } from "../tasks/Encargado/CrearCuponQRPago";
+import { crearCuponDniPago } from "../tasks/Encargado/CrearCuponDniPago";
+import { crearCuponQr } from "../tasks/Encargado/CrearCuponQr";
+import { crearCuponQrPago } from "../tasks/Encargado/CrearCuponQrPago";
 
 async function reportTestError(error: any, page: Page, testInfo: string) {
   console.error(`Error en test "${testInfo}":`, error.message);
@@ -157,7 +157,6 @@ test.describe("Gestión de Cupones", () => {
       }
     });
 
-
     test("Puede editar un cupón DNI y ver confirmación", async ({ page }) => {
       allure.description(
         "Verifica que un encargado pueda editar un cupón DNI existente y recibir confirmación de la modificación"
@@ -202,8 +201,6 @@ test.describe("Gestión de Cupones", () => {
         throw error;
       }
     });
-
-
 
     test("Puede eliminar un cupón DNI y ver confirmación", async ({
       page,
@@ -1021,5 +1018,5 @@ test.describe("Gestión de Cupones", () => {
       }
     });
   });
-  
+
 });

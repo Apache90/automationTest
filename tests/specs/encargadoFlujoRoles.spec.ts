@@ -11,6 +11,7 @@ import { SupervisorModal } from "../helpers/supervisormodals";
 import { EliminarVendedorPorEmail } from "../tasks/Encargado/EliminarVendedorPorEmail";
 import { EliminarCanjeadorPorEmail } from "../tasks/Encargado/EliminarCanjeadorPorEmail";
 import { EliminarSupervisorPorEmail } from "../tasks/Encargado/EliminarSupervisorPorEmail";
+import { crearLimitacionVendedor } from "../tasks/Encargado/CrearLimitacionVendedor";
 import { allure } from "allure-playwright";
 
 // Configuración global para manejar diálogos inesperados
@@ -106,6 +107,71 @@ test.describe("Gestión de Roles", () => {
       // Usar el helper para esperar y cerrar el modal de error
       await modal.esperarModalError("El usuario ya posee el rol indicado.");
       await modal.cerrarModalError();
+    });
+
+    // Tests de limitaciones de vendedores
+    test("Puede crear limitación DNI para vendedor y ver confirmación", async ({ page }) => {
+      allure.description("Verifica que un encargado pueda crear una limitación DNI para un vendedor específico");
+      allure.severity("critical");
+
+      const encargado = new Encargado(page);
+
+      // Login y selección de rol
+      await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+      await page.waitForLoadState("networkidle");
+      await seleccionarRolGeneral(encargado);
+      await page.waitForLoadState("networkidle");
+
+      // Crear limitación DNI
+      await crearLimitacionVendedor(encargado, "vendedor3@gmail.com", "DNI GRUPO TEST", "5");
+    });
+
+    test("Puede crear limitación DNI Pago para vendedor y ver confirmación", async ({ page }) => {
+      allure.description("Verifica que un encargado pueda crear una limitación DNI Pago para un vendedor específico");
+      allure.severity("critical");
+
+      const encargado = new Encargado(page);
+
+      // Login y selección de rol
+      await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+      await page.waitForLoadState("networkidle");
+      await seleccionarRolGeneral(encargado);
+      await page.waitForLoadState("networkidle");
+
+      // Crear limitación DNI Pago
+      await crearLimitacionVendedor(encargado, "vendedor3@gmail.com", "DNI PAGO GRUPO TEST", "3");
+    });
+
+    test("Puede crear limitación QR para vendedor y ver confirmación", async ({ page }) => {
+      allure.description("Verifica que un encargado pueda crear una limitación QR para un vendedor específico");
+      allure.severity("critical");
+
+      const encargado = new Encargado(page);
+
+      // Login y selección de rol
+      await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+      await page.waitForLoadState("networkidle");
+      await seleccionarRolGeneral(encargado);
+      await page.waitForLoadState("networkidle");
+
+      // Crear limitación QR
+      await crearLimitacionVendedor(encargado, "vendedor3@gmail.com", "QR GRUPO TEST", "10");
+    });
+
+    test("Puede crear limitación QR Pago para vendedor y ver confirmación", async ({ page }) => {
+      allure.description("Verifica que un encargado pueda crear una limitación QR Pago para un vendedor específico");
+      allure.severity("critical");
+
+      const encargado = new Encargado(page);
+
+      // Login y selección de rol
+      await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+      await page.waitForLoadState("networkidle");
+      await seleccionarRolGeneral(encargado);
+      await page.waitForLoadState("networkidle");
+
+      // Crear limitación QR Pago
+      await crearLimitacionVendedor(encargado, "vendedor3@gmail.com", "QR $ GRUPO TEST", "7");
     });
 
     test("Puede eliminar un vendedor existente y ver confirmación", async ({
@@ -401,5 +467,5 @@ test.describe("Gestión de Roles", () => {
       }
     });
   });
-  
+
 });
