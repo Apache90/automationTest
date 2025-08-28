@@ -223,6 +223,7 @@ test.describe("Gestión de Grupos de Vendedores", () => {
 });
 
 test.describe("Gestion de Grupos de Cupones", () => {
+    
 
     test.beforeEach(() => {
         allure.epic("Encargado");
@@ -329,6 +330,7 @@ test.describe("Gestion de Grupos de Cupones", () => {
             allure.severity("critical");
 
             const encargado = new Encargado(page);
+            const grupoModal = new GruposCuponesModal(page);
 
             // Login y selección de rol
             await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
@@ -344,6 +346,8 @@ test.describe("Gestion de Grupos de Cupones", () => {
     });
 
     test.describe("Grupo DNIsPago", () => {
+        test.describe.configure({ mode: "serial" });
+        
         test("Puede crear un grupo de cupones DNIsPago y ver confirmación", async ({ page }) => {
             allure.description("Verifica que un encargado pueda crear un grupo de cupones DNIsPago y recibir confirmación de éxito");
             allure.severity("critical");
@@ -440,6 +444,7 @@ test.describe("Gestion de Grupos de Cupones", () => {
             allure.severity("critical");
 
             const encargado = new Encargado(page);
+            const grupoModal = new GruposCuponesModal(page);
 
             // Login y selección de rol
             await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
@@ -553,6 +558,7 @@ test.describe("Gestion de Grupos de Cupones", () => {
             allure.severity("critical");
 
             const encargado = new Encargado(page);
+            const grupoModal = new GruposCuponesModal(page);
 
             // Login y selección de rol
             await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
@@ -666,6 +672,7 @@ test.describe("Gestion de Grupos de Cupones", () => {
             allure.severity("critical");
 
             const encargado = new Encargado(page);
+            const grupoModal = new GruposCuponesModal(page);
 
             // Login y selección de rol
             await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");

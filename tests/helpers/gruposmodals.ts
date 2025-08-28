@@ -106,4 +106,15 @@ export class GruposVendedoresModal {
     const ok = modal.locator('.dialog-button', { hasText: 'OK' });
     await ok.click();
   }
+
+  async confirmarEliminacionGrupoVendedores() {
+    // Esperar el modal de confirmación antes de eliminar
+    const modalConfirmacion = this.page.locator('.dialog.dialog-buttons-1.custom-dialog-background.modal-in');
+    await expect(modalConfirmacion).toBeVisible({ timeout: 5000 });
+    await expect(modalConfirmacion.locator('.dialog-title .btnCustomDialogTitle')).toContainText('DOORS');
+    await expect(modalConfirmacion.locator('.dialog-text .btnCustomDialogSubtitle')).toContainText('¿Estás seguro que deseas eliminar este grupo?');
+
+    // Click en "Confirmar"
+    await modalConfirmacion.locator('.dialog-button', { hasText: 'Confirmar' }).click();
+  }
 }

@@ -47,9 +47,9 @@ export const TestConfig = {
   testOrder: [
     'register.spec.ts',      // Registro de usuarios  
     'login.spec.ts',         // Base de autenticación
-    'encargadoFlujoRoles.spec.ts',    // Gestión de roles
     'encargadoFlujoCupones.spec.ts',  // Gestión de cupones
-    'encargadoFlujoGrupos.spec.ts'    // Gestión de grupos
+    'encargadoFlujoGrupos.spec.ts',    // Gestión de grupos
+    'encargadoFlujoRoles.spec.ts'      // Gestión de roles
     // 'vendedor-flujo.spec.ts' - Pendiente de incluir
   ],
 

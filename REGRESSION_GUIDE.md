@@ -41,9 +41,9 @@ scripts/             # Scripts de automatización y runners
 ### 2. Orden de Ejecución Actualizado (Crítico)
 1. `register.spec.ts` - **Registro de usuarios** (debe ir primero)
 2. `login.spec.ts` - **Base de autenticación** (depende del registro)
-3. `encargadoFlujoRoles.spec.ts` - **Gestión de roles** (crea usuarios necesarios)
-4. `encargadoFlujoCupones.spec.ts` - **Gestión de cupones** (usa roles creados)
-5. `encargadoFlujoGrupos.spec.ts` - **Gestión de grupos** (organiza cupones y usuarios)
+3. `encargadoFlujoCupones.spec.ts` - **Gestión de cupones** (usa roles creados)
+4. `encargadoFlujoGrupos.spec.ts` - **Gestión de grupos** (organiza cupones y usuarios)
+5. `encargadoFlujoRoles.spec.ts` - **Gestión de roles** (crea usuarios necesarios)
 6. `vendedor-flujo.spec.ts` - **Flujos de vendedor** (⚠️ temporalmente excluido)
 
 > **⚠️ IMPORTANTE**: Este orden es crítico debido a las dependencias de datos entre tests.

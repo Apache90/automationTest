@@ -80,7 +80,7 @@ export async function crearGrupoCuponesDni(encargado: Encargado) {
   await grupoModal.ingresarNombreGrupo("GRUPO CUPONES DNI");
 
   // Esperar confirmación
-  await grupoModal.esperarModalExito("GRUPO CUPONES DNI");
+  await grupoModal.esperarModalExitoCuponAgregado();
 
   // Validar grupo en la lista
   const grupoEnLista = page.locator('.list.accordion-list ul li.accordion-item .item-title', { hasText: "GRUPO CUPONES DNI" });
@@ -136,7 +136,7 @@ export async function crearGrupoCuponesDniPago(encargado: Encargado) {
   await grupoModal.ingresarNombreGrupo("GRUPO CUPONES DNI PAGO");
 
   // Esperar confirmación
-  await grupoModal.esperarModalExito("GRUPO CUPONES DNI PAGO");
+  await grupoModal.esperarModalExitoCuponAgregado();
 
   // Validar grupo en la lista
   const grupoEnLista = page.locator('.list.accordion-list ul li.accordion-item .item-title', { hasText: "GRUPO CUPONES DNI PAGO" });

@@ -25,13 +25,13 @@ export async function eliminarGrupoCuponesQr(
   await grupoItem.click();
   await page.waitForTimeout(500);
 
-  // Click en "Eliminar grupo"
-  const botonEliminarGrupo = page.locator('a.list-button.color-red', { hasText: 'Eliminar grupo' });
+  // Click en "Eliminar grupo" - selector actualizado
+  const botonEliminarGrupo = page.locator('a.button', { hasText: 'Eliminar grupo' });
   await expect(botonEliminarGrupo).toBeVisible({ timeout: 5000 });
   await botonEliminarGrupo.click();
 
-  // Esperar y cerrar modal de éxito
-  await grupoModal.esperarModalExitoGrupoEliminado();
+  // Confirmar eliminación en el modal de confirmación
+  await grupoModal.confirmarEliminacionGrupoCupones();
 
   // Verificar que ya no existe el grupo (SIN INFORMACIÓN PARA MOSTRAR)
   const sinInfo = page.locator('.item-title', { hasText: 'SIN INFORMACIÓN PARA MOSTRAR' });
@@ -61,13 +61,13 @@ export async function eliminarGrupoCuponesQrPago(
   await grupoItem.click();
   await page.waitForTimeout(500);
 
-  // Click en "Eliminar grupo"
-  const botonEliminarGrupo = page.locator('a.list-button.color-red', { hasText: 'Eliminar grupo' });
+  // Click en "Eliminar grupo" - selector actualizado
+  const botonEliminarGrupo = page.locator('a.button', { hasText: 'Eliminar grupo' });
   await expect(botonEliminarGrupo).toBeVisible({ timeout: 5000 });
   await botonEliminarGrupo.click();
 
-  // Esperar y cerrar modal de éxito
-  await grupoModal.esperarModalExitoGrupoEliminado();
+  // Confirmar eliminación en el modal de confirmación
+  await grupoModal.confirmarEliminacionGrupoCupones();
 
   // Verificar que ya no existe el grupo (SIN INFORMACIÓN PARA MOSTRAR)
   const sinInfo = page.locator('.item-title', { hasText: 'SIN INFORMACIÓN PARA MOSTRAR' });

@@ -75,10 +75,10 @@ export class GruposCuponesModal {
 
   async esperarModalExitoCuponAgregado() {
     // Esperar el modal de éxito al agregar cupón
-    const modal = this.page.locator('.dialog.dialog-buttons-1.modal-in');
+    const modal = this.page.locator('.dialog.modal-in');
     await expect(modal).toBeVisible({ timeout: 5000 });
     await expect(modal.locator('.dialog-title')).toContainText('DOORS');
-    await expect(modal.locator('.dialog-text')).toContainText('Cupon agregado correctamente');
+    await expect(modal.locator('.dialog-text')).toContainText('Cupón agregado correctamente');
 
     // Hacer click en "OK"
     const ok = modal.locator('.dialog-button', { hasText: 'OK' });
@@ -114,6 +114,24 @@ export class GruposCuponesModal {
     await expect(modal.locator('.dialog-title')).toContainText('DOORS');
     await expect(modal.locator('.dialog-text')).toContainText('Grupo eliminado con éxito');
     await modal.locator('.dialog-button', { hasText: 'OK' }).click();
+  }
+
+  async confirmarEliminacionGrupoCupones() {
+    // Esperar el modal de confirmación
+    const modalConfirmacion = this.page.locator('.dialog.modal-in');
+    await expect(modalConfirmacion).toBeVisible({ timeout: 5000 });
+    
+    // Confirmar eliminación
+    const botonConfirmar = modalConfirmacion.locator('.dialog-button', { hasText: 'Confirmar' });
+    await botonConfirmar.click();
+    
+    // Esperar que aparezca el modal de éxito
+    const modalExito = this.page.locator('.dialog.modal-in');
+    await expect(modalExito).toBeVisible({ timeout: 5000 });
+    await expect(modalExito.locator('.dialog-text')).toContainText('Grupo eliminado con éxito');
+    
+    // Cerrar modal de éxito
+    await modalExito.locator('.dialog-button', { hasText: 'OK' }).click();
   }
   
 }

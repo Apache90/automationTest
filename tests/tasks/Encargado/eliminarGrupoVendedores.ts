@@ -1,11 +1,13 @@
 import { expect } from "@playwright/test";
 import { Encargado } from "../../actors/Encargado";
+import { GruposVendedoresModal } from "../../helpers/gruposmodals";
 
 export async function eliminarGrupoVendedores(
   encargado: Encargado,
   nombreGrupo: string
 ) {
   const { page } = encargado;
+  const grupoModal = new GruposVendedoresModal(page);
 
   // Solo haz click en "Vendedores" si NO estás ya en la sección
   const heading = page.locator('h1', { hasText: 'Vendedores' });
@@ -26,6 +28,9 @@ export async function eliminarGrupoVendedores(
   await page.waitForTimeout(500);
 
   // Hacer click en "Eliminar grupo"
-  const botonEliminarGrupo = page.locator('a.list-button.color-red', { hasText: 'Eliminar grupo' });
+  const botonEliminarGrupo = page.locator('a.button', { hasText: 'Eliminar grupo' });
   await botonEliminarGrupo.click();
+
+  // Confirmar eliminación en el modal
+  await grupoModal.confirmarEliminacionGrupoVendedores();
 }

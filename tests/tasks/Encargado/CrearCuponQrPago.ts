@@ -110,7 +110,7 @@ export async function crearGrupoCuponesQrPago(encargado: Encargado) {
   await grupoModal.ingresarNombreGrupo("GRUPO DE CUPONES QRS $");
 
   // Esperar confirmación
-  await grupoModal.esperarModalExito("GRUPO DE CUPONES QRS $");
+  await grupoModal.esperarModalExitoCuponAgregado();
 
   // Validar grupo en la lista
   const grupoEnLista = page.locator('.list.accordion-list ul li.accordion-item .item-title', { hasText: "GRUPO DE CUPONES QRS $" });
