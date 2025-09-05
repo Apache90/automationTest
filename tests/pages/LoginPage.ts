@@ -14,7 +14,7 @@ export class LoginPage {
     }
 
     async navigate() {
-        await this.page.goto('https://doorsticketsdev.com/#!/login/');
+        await this.page.goto('https://doorstickets.com/#!/login/');
     }
 
     async login(email: string, password: string) {

@@ -18,8 +18,8 @@ export async function crearLimitacionVendedor(
   // Click en crear nueva limitación
   await limitacionesPage.clickCrearNuevaLimitacion();
 
-  // Seleccionar fecha (27/08/2025 - 27/08/2025)
-  await limitacionesPage.seleccionarFecha("27/08/2025");
+  // Seleccionar fecha
+  await limitacionesPage.seleccionarFecha("15/09/2025");
 
   // Seleccionar cupón
   await limitacionesPage.seleccionarCupon(nombreCupon);

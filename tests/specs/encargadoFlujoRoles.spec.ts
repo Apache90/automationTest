@@ -109,7 +109,6 @@ test.describe("Gestión de Roles", () => {
       await modal.cerrarModalError();
     });
 
-    // Tests de limitaciones de vendedores
     test("Puede crear limitación DNI para vendedor y ver confirmación", async ({ page }) => {
       allure.description("Verifica que un encargado pueda crear una limitación DNI para un vendedor específico");
       allure.severity("critical");

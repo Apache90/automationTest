@@ -43,7 +43,7 @@ export class RegisterPage {
 
   // Método para navegar a la página de registro
   async navigate() {
-    await this.page.goto('https://doorsticketsdev.com/#!/login/');
+    await this.page.goto('https://doorstickets.com/#!/login/');
     await this.page.locator('a.doors-button-outline', { hasText: 'Registrarse' }).click();
     await this.page.waitForURL('**/#!/register/');
   }

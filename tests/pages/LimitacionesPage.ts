@@ -1,4 +1,4 @@
-import { Page, expect } from "@playwright/test";
+import { Page, expect, Locator } from "@playwright/test";
 
 export class LimitacionesPage {
   readonly page: Page;
@@ -41,7 +41,7 @@ export class LimitacionesPage {
     await this.page.waitForLoadState("networkidle");
   }
 
-  async seleccionarFecha(fecha: string = "27/08/2025") {
+  async seleccionarFecha(fecha: string = "15/09/2025") {
     // Click en el campo de fecha
     const campoFecha = this.page.locator('input[type="text"][placeholder*="01/02/2000 - 31/01/2051"]');
     await expect(campoFecha).toBeVisible({ timeout: 5000 });
@@ -51,11 +51,31 @@ export class LimitacionesPage {
     const calendario = this.page.locator('.calendar.calendar-modal.modal-in');
     await expect(calendario).toBeVisible({ timeout: 5000 });
     
-    // Seleccionar el día 27 (dos veces para rango desde-hasta)
-    const dia27 = calendario.locator('.calendar-day[data-date="2025-7-27"]');
-    await expect(dia27).toBeVisible({ timeout: 5000 });
-    await dia27.click(); // Primera selección (desde)
-    await dia27.click(); // Segunda selección (hasta)
+    // Parsear la fecha para obtener día, mes y año
+    const [dia, mes, año] = fecha.split('/');
+    const mesNumero = parseInt(mes);
+    const añoNumero = parseInt(año);
+    const diaNumero = parseInt(dia);
+    
+    // Esperar un momento para que el calendario se estabilice
+    await this.page.waitForTimeout(500);
+    
+    // Navegar al año correcto usando los selectores reales
+    await this.navegarAñoCalendario(calendario, añoNumero);
+    
+    // Navegar al mes correcto usando los selectores reales
+    await this.navegarMesCalendario(calendario, mesNumero);
+    
+    // Seleccionar el día específico usando el formato data-date correcto
+    const diaSelector = `.calendar-day[data-date="${añoNumero}-${mesNumero}-${diaNumero}"]:not(.calendar-day-prev):not(.calendar-day-next)`;
+    const diaElement = calendario.locator(diaSelector);
+    
+    await expect(diaElement).toBeVisible({ timeout: 10000 });
+    
+    // Seleccionar el día (dos veces para rango desde-hasta)
+    await diaElement.click({ force: true }); // Primera selección (desde)
+    await this.page.waitForTimeout(200);
+    await diaElement.click({ force: true }); // Segunda selección (hasta)
     
     // Click en "Listo"
     const botonListo = calendario.locator('a.button.calendar-close', { hasText: 'Listo' });
@@ -64,6 +84,54 @@ export class LimitacionesPage {
     
     // Esperar que el calendario se cierre
     await expect(calendario).not.toBeVisible({ timeout: 5000 });
+  }
+
+  async navegarAñoCalendario(calendario: Locator, añoObjetivo: number) {
+    // Obtener el año actual mostrado usando el selector correcto
+    const añoActual = await calendario.locator('.current-year-value').textContent();
+    const añoActualNum = parseInt(añoActual?.trim() || '2025');
+    
+    if (añoActualNum === añoObjetivo) return;
+    
+    // Navegar al año objetivo usando los botones correctos
+    const diferencia = añoObjetivo - añoActualNum;
+    const boton = diferencia > 0 ? '.calendar-next-year-button' : '.calendar-prev-year-button';
+    const clicks = Math.abs(diferencia);
+    
+    for (let i = 0; i < clicks; i++) {
+      await calendario.locator(boton).click();
+      await this.page.waitForTimeout(300);
+    }
+  }
+
+  async navegarMesCalendario(calendario: Locator, mesObjetivo: number) {
+    // Mapeo de nombres de meses a números
+    const mesesNombres = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
+                         'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    
+    // Obtener el mes actual usando el selector correcto
+    const mesActualTexto = await calendario.locator('.current-month-value').textContent();
+    const mesActualNum = mesesNombres.findIndex(m => mesActualTexto?.toLowerCase().includes(m)) + 1;
+    
+    if (mesActualNum === mesObjetivo) return;
+    
+    // Navegar al mes objetivo
+    const diferencia = mesObjetivo - mesActualNum;
+    let clicks = Math.abs(diferencia);
+    let boton = '.calendar-next-month-button';
+    
+    if (diferencia < 0) {
+      boton = '.calendar-prev-month-button';
+    } else if (diferencia > 6) {
+      // Es más corto ir hacia atrás
+      boton = '.calendar-prev-month-button';
+      clicks = 12 - diferencia;
+    }
+    
+    for (let i = 0; i < clicks; i++) {
+      await calendario.locator(boton).click();
+      await this.page.waitForTimeout(300);
+    }
   }
 
   async seleccionarCupon(nombreCupon: string) {
