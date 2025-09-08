@@ -212,4 +212,100 @@ export class LimitacionesPage {
     // Verificar que regresamos a la página de limitaciones del vendedor
     await expect(this.page).toHaveURL(/limitaciones\/$/);
   }
+
+  async clickEliminarLimitacion(nombreCupon: string) {
+    // Determinar qué sección desplegar basándose en el nombre del cupón
+    let seccionTexto = "";
+    if (nombreCupon.includes("DNI PAGO") || nombreCupon.includes("DNI'S PAGO")) {
+      seccionTexto = "DNI'S PAGO";
+    } else if (nombreCupon.includes("DNI")) {
+      seccionTexto = "DNI'S";
+    } else if (nombreCupon.includes("QR") && nombreCupon.includes("$")) {
+      seccionTexto = "QR'S PAGO";
+    } else if (nombreCupon.includes("QR")) {
+      seccionTexto = "QR'S";
+    }
+    
+    if (seccionTexto) {
+      // Hacer click en la sección correspondiente para desplegarla usando un selector más específico
+      const seccionCupon = this.page.locator(`.couponType.svelte-9yezak`).filter({ hasText: new RegExp(`^${seccionTexto}\\s+Cantidad\\s+Acciones`) });
+      await expect(seccionCupon).toBeVisible({ timeout: 5000 });
+      await seccionCupon.click();
+      
+      // Esperar un momento para que se despliegue
+      await this.page.waitForTimeout(1000);
+    }
+    
+    // Buscar el componente que contiene la limitación específica
+    const limitacionContainer = this.page.locator('.grid-container').filter({
+      has: this.page.locator('.item-title', { hasText: nombreCupon })
+    });
+    
+    await expect(limitacionContainer).toBeVisible({ timeout: 5000 });
+    
+    // Buscar el botón de eliminar (icono trash) - usar un selector más simple basado en el HTML real
+    const botonEliminar = limitacionContainer.locator('.margin-horizontal i.f7-icons:has-text("trash")').locator('xpath=following-sibling::div//a');
+    
+    // Si no encuentra con el selector anterior, probar alternativas
+    if (!(await botonEliminar.isVisible())) {
+      // Alternativa 1: buscar directamente el enlace después del icono trash
+      const botonEliminarAlt1 = limitacionContainer.locator('i.f7-icons:has-text("trash") + div a');
+      if (await botonEliminarAlt1.isVisible()) {
+        await botonEliminarAlt1.click();
+        return;
+      }
+      
+      // Alternativa 2: buscar cualquier enlace cerca del icono trash
+      const botonEliminarAlt2 = limitacionContainer.locator('.margin-horizontal:has(i.f7-icons:has-text("trash")) a');
+      if (await botonEliminarAlt2.isVisible()) {
+        await botonEliminarAlt2.click();
+        return;
+      }
+      
+      // Alternativa 3: hacer click directamente en el div que contiene el enlace invisible
+      const divConEnlace = limitacionContainer.locator('i.f7-icons:has-text("trash") + div');
+      if (await divConEnlace.isVisible()) {
+        await divConEnlace.click();
+        return;
+      }
+    } else {
+      await botonEliminar.click();
+    }
+  }
+
+  async confirmarEliminacionLimitacion() {
+    // Esperar el modal de confirmación
+    const modalConfirmacion = this.page.locator('.dialog.dialog-buttons-1.custom-dialog-background.modal-in');
+    await expect(modalConfirmacion).toBeVisible({ timeout: 5000 });
+    
+    // Verificar contenido del modal
+    await expect(modalConfirmacion.locator('.dialog-title')).toContainText('DOORS');
+    await expect(modalConfirmacion.locator('.dialog-text')).toContainText('¿Estás seguro que deseas eliminar esta limitación?');
+    
+    // Click en "Confirmar"
+    const botonConfirmar = modalConfirmacion.locator('.dialog-button', { hasText: 'Confirmar' });
+    await expect(botonConfirmar).toBeVisible({ timeout: 5000 });
+    await botonConfirmar.click();
+    
+    // Esperar que el modal de confirmación se cierre
+    await expect(modalConfirmacion).not.toBeVisible({ timeout: 5000 });
+  }
+
+  async esperarModalEliminacionExitosa() {
+    // Esperar el modal de éxito
+    const modalExito = this.page.locator('.dialog.dialog-buttons-1.modal-in');
+    await expect(modalExito).toBeVisible({ timeout: 5000 });
+    
+    // Verificar contenido del modal de éxito
+    await expect(modalExito.locator('.dialog-title')).toContainText('DOORS');
+    await expect(modalExito.locator('.dialog-text')).toContainText('¡Limitación eliminada correctamente!');
+    
+    // Click en "OK" para cerrar
+    const botonOK = modalExito.locator('.dialog-button', { hasText: 'OK' });
+    await expect(botonOK).toBeVisible({ timeout: 5000 });
+    await botonOK.click();
+    
+    // Esperar que el modal se cierre
+    await expect(modalExito).not.toBeVisible({ timeout: 5000 });
+  }
 }

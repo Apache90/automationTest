@@ -12,6 +12,7 @@ import { EliminarVendedorPorEmail } from "../tasks/Encargado/EliminarVendedorPor
 import { EliminarCanjeadorPorEmail } from "../tasks/Encargado/EliminarCanjeadorPorEmail";
 import { EliminarSupervisorPorEmail } from "../tasks/Encargado/EliminarSupervisorPorEmail";
 import { crearLimitacionVendedor } from "../tasks/Encargado/CrearLimitacionVendedor";
+import { eliminarLimitacionVendedor } from "../tasks/Encargado/EliminarLimitacionVendedor";
 import { allure } from "allure-playwright";
 
 // Configuración global para manejar diálogos inesperados
@@ -43,9 +44,7 @@ test.describe("Gestión de Roles", () => {
 
     const email = "vendedor3@gmail.com";
 
-    test("Puede agregar un nuevo vendedor y ver confirmación", async ({
-      page,
-    }) => {
+    test("Puede agregar un nuevo vendedor y ver confirmación", async ({ page }) => {
       allure.description(
         "Verifica que un encargado pueda agregar un nuevo vendedor al sistema y recibir confirmación de éxito"
       );
@@ -73,9 +72,7 @@ test.describe("Gestión de Roles", () => {
       await expect(emailEnLista).toBeVisible({ timeout: 10000 });
     });
 
-    test("Muestra mensaje si el vendedor ya posee el rol indicado", async ({
-      page,
-    }) => {
+    test("Muestra mensaje si el vendedor ya posee el rol indicado", async ({ page }) => {
       allure.description(
         "Verifica que se muestre un mensaje de error cuando se intenta agregar un vendedor con rol ya existente"
       );
@@ -173,9 +170,23 @@ test.describe("Gestión de Roles", () => {
       await crearLimitacionVendedor(encargado, "vendedor3@gmail.com", "QR $ GRUPO TEST", "7");
     });
 
-    test("Puede eliminar un vendedor existente y ver confirmación", async ({
-      page,
-    }) => {
+    test("Puede eliminar una limitación de vendedor y ver confirmación", async ({ page }) => {
+      allure.description("Verifica que un encargado pueda eliminar una limitación asignada a un vendedor específico y reciba confirmación de éxito");
+      allure.severity("critical");
+
+      const encargado = new Encargado(page);
+
+      // Login y selección de rol
+      await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+      await page.waitForLoadState("networkidle");
+      await seleccionarRolGeneral(encargado);
+      await page.waitForLoadState("networkidle");
+
+      // Eliminar limitación DNI (creada en test anterior)
+      await eliminarLimitacionVendedor(encargado, "vendedor3@gmail.com", "DNI GRUPO TEST");
+    });
+
+    test("Puede eliminar un vendedor existente y ver confirmación", async ({  page }) => {
       allure.description(
         "Verifica que un encargado pueda eliminar un vendedor existente y recibir confirmación de la operación"
       );
