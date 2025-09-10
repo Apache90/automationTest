@@ -58,17 +58,6 @@ class TestRunner {
     
     const startTime = Date.now();
     
-    // Construcción del comando
-    const testFiles = this.testOrder.join(' ');
-    const command = 'npx';
-    const args = [
-      'playwright', 'test',
-      '--workers=1',
-      '--reporter=line,allure-playwright',
-      '--project=chromium',
-      ...this.testOrder
-    ];
-    
     console.log(`📋 Orden de ejecución:`);
     this.testOrder.forEach((test, index) => {
       const testName = test.replace('tests/specs/', '').replace('.spec.ts', '');
@@ -76,8 +65,25 @@ class TestRunner {
     });
     console.log('');
     
-    // Ejecutar comando
-    await this.runCommand(command, args);
+    // Ejecutar cada archivo de test secuencialmente
+    for (let i = 0; i < this.testOrder.length; i++) {
+      const testFile = this.testOrder[i];
+      const testName = testFile.replace('tests/specs/', '').replace('.spec.ts', '');
+      
+      console.log(`🔄 [${i + 1}/${this.testOrder.length}] Ejecutando: ${testName}`);
+      
+      const command = 'npx';
+      const args = [
+        'playwright', 'test',
+        '--workers=1',
+        '--reporter=line,allure-playwright',
+        '--project=chromium',
+        testFile
+      ];
+      
+      await this.runCommand(command, args);
+      console.log(`✅ Completado: ${testName}\n`);
+    }
     
     const endTime = Date.now();
     const duration = Math.round((endTime - startTime) / 1000);

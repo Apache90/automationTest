@@ -4,8 +4,8 @@ import { TestConfig } from './tests/config/TestConfig';
 export default defineConfig({
   testDir: './tests/specs',
   
-  // Configurar orden de ejecución basado en TestConfig
-  testMatch: TestConfig.testOrder,
+  // Remover testMatch para evitar conflictos con scripts personalizados
+  // testMatch: TestConfig.testOrder,
   
   // Añadir timeouts explícitos
   timeout: 60000, // 60 segundos para timeout global
