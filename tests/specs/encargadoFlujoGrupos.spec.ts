@@ -181,8 +181,6 @@ test.describe("Gestión de Grupos de Vendedores", () => {
         await expect(page.locator('.item-title', { hasText: "No tenés grupo de Vendedores." })).toBeVisible({ timeout: 5000 });
     });
 
-
-
     test("Muestra error si no se ingresa nombre al crear grupo", async ({ page }) => {
         allure.description("Verifica que se muestre un error si no se ingresa nombre al crear un grupo de vendedores");
         allure.severity("normal");
@@ -205,7 +203,7 @@ test.describe("Gestión de Grupos de Vendedores", () => {
 });
 
 test.describe("Gestion de Grupos de Cupones", () => {
-    
+
 
     test.beforeEach(() => {
         allure.epic("Encargado");
@@ -329,7 +327,7 @@ test.describe("Gestion de Grupos de Cupones", () => {
 
     test.describe("Grupo DNIsPago", () => {
         test.describe.configure({ mode: "serial" });
-        
+
         test("Puede crear un grupo de cupones DNIsPago y ver confirmación", async ({ page }) => {
             allure.description("Verifica que un encargado pueda crear un grupo de cupones DNIsPago y recibir confirmación de éxito");
             allure.severity("critical");

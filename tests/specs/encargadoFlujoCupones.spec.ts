@@ -975,9 +975,7 @@ test.describe("Gestión de Cupones", () => {
       }
     });
 
-    test("Puede eliminar un cupón QR Pago y ver confirmación", async ({
-      page,
-    }) => {
+    test("Puede eliminar un cupón QR Pago y ver confirmación", async ({ page }) => {
       allure.description(
         "Verifica que un encargado pueda eliminar un cupón QR Pago existente y recibir confirmación de la eliminación"
       );

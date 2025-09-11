@@ -1,15 +1,20 @@
 import { test, expect } from '@playwright/test';
 import { RegisterPage } from '../pages/RegisterPage';
 import { allure } from 'allure-playwright';
+import { AllureBusinessConfig } from '../config/AllureBusinessConfig';
 
-test.describe('Registro de usuario', () => {
+// EPIC: Autenticación de Usuarios  
+test.describe('🔐 Autenticación - Registro de Usuario', () => {
+  
+  test.beforeEach(() => {
+    allure.epic("🔐 Autenticación de Usuarios");
+    allure.feature("Registro de Usuarios");
+  });
+
   test('Registro exitoso', async ({ page }) => {
-
-    allure.label('owner', 'Emir Segovia');
+    allure.story("Creación de Cuenta");
+    allure.description('Verifica que un usuario pueda registrarse exitosamente con datos válidos');
     allure.severity('critical');
-    allure.feature('Register');
-    allure.story('Validaciones en registro de cuenta');
-
 
     const registerPage = new RegisterPage(page);
 

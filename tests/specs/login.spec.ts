@@ -4,13 +4,17 @@ import { cerrarModalSiExiste } from '../helpers/loginmodals';
 import { CommonHelpers } from '../helpers/CommonHelpers';
 import { TestConfig } from '../config/TestConfig';
 import { allure } from 'allure-playwright';
+import { AllureBusinessConfig } from '../config/AllureBusinessConfig';
 
-test.describe('Tests del login', () => {
-
-    // Configurar modo serial para evitar conflictos
+// EPIC: Autenticación de Usuarios
+test.describe('🔐 Autenticación - Inicio de Sesión', () => {
     test.describe.configure({ mode: "serial" });
 
     test.beforeEach(async ({ page }) => {
+        // Aplicar etiquetas de negocio
+        allure.epic("🔐 Autenticación de Usuarios");
+        allure.feature("Inicio de Sesión");
+        
         // Configurar manejo de diálogos
         CommonHelpers.setupDialogHandler(page);
         
@@ -22,12 +26,11 @@ test.describe('Tests del login', () => {
     });
 
     test('Debe mostrar error si no se ingresa el email', async ({ page }) => {
-        const loginPage = new LoginPage(page);
-
-        allure.label('owner', 'Emir Segovia');
+        allure.story("Validación de Credenciales");
+        allure.description('Verifica que se muestre un error cuando el campo email está vacío');
         allure.severity('critical');
-        allure.feature('Login');
-        allure.story('Validación de campos vacíos');
+
+        const loginPage = new LoginPage(page);
 
         await loginPage.passwordInput.fill('123456');
         await loginPage.emailInput.fill('algo');
