@@ -10,10 +10,19 @@ export class CanjeadorModal {
     }
 
     async completarEmailYConfirmar(email: string) {
-        const input = this.page.locator('#inputValue');
-        const confirmar = this.page.locator('.dialog-buttons .dialog-button', { hasText: 'Confirmar' });
-
+        // Esperar que el modal aparezca
+        await expect(this.modal).toBeVisible({ timeout: 5000 });
+        
+        // Llenar el input de email con el nuevo selector
+        const input = this.page.locator('#inputEmailCanjeador');
         await input.fill(email);
+        
+        // Seleccionar tipo de escaneo (QR y DNI por defecto)
+        const scanTypeBoth = this.page.locator('input[type="radio"][value="BOTH"]');
+        await scanTypeBoth.check();
+        
+        // Click en confirmar
+        const confirmar = this.page.locator('.dialog-buttons .dialog-button', { hasText: 'Confirmar' });
         await confirmar.click();
     }
 
@@ -48,5 +57,31 @@ export class CanjeadorModal {
         await expect(this.modal).toContainText('Canjeador quitado correctamente.');
         const ok = this.page.locator('.dialog-button', { hasText: 'OK' });
         await ok.click();
+    }
+
+    async editarTipoEscaneo(tipoEscaneo: 'QR' | 'DNI' | 'BOTH') {
+        // Esperar que el modal de edición aparezca
+        await expect(this.modal).toBeVisible({ timeout: 5000 });
+        await expect(this.modal).toContainText('Editar Canjeador');
+        
+        // Seleccionar el tipo de escaneo
+        const radioButton = this.page.locator(`input[type="radio"][value="${tipoEscaneo}"]`);
+        await radioButton.check();
+        
+        // Click en confirmar
+        const confirmar = this.page.locator('.dialog-buttons .dialog-button', { hasText: 'Confirmar' });
+        await confirmar.click();
+        
+        // Esperar modal de éxito
+        await this.esperarModalActualizacionExitosa();
+    }
+
+    async esperarModalActualizacionExitosa() {
+        await expect(this.modal).toBeVisible({ timeout: 5000 });
+        await expect(this.modal).toContainText('Actualizado correctamente.');
+        
+        // Click en OK para cerrar
+        const botonOK = this.page.locator('.dialog-button', { hasText: 'OK' });
+        await botonOK.click();
     }
 }

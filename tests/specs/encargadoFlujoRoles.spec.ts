@@ -14,6 +14,7 @@ import { EliminarSupervisorPorEmail } from "../tasks/Encargado/EliminarSuperviso
 import { crearLimitacionVendedor } from "../tasks/Encargado/CrearLimitacionVendedor";
 import { eliminarLimitacionVendedor } from "../tasks/Encargado/EliminarLimitacionVendedor";
 import { exportarLimitacionesVendedor } from "../tasks/Encargado/ExportarLimitacionesVendedor";
+import { editarTipoEscaneoCanjeador } from "../tasks/Encargado/EditarTipoEscaneoCanjeador";
 import { allure } from "allure-playwright";
 import { AllureBusinessConfig } from "../config/AllureBusinessConfig";
 
@@ -217,7 +218,7 @@ test.describe("Gestión de Roles", () => {
           );
         });
 
-        
+
 
       });
 
@@ -310,14 +311,13 @@ test.describe("Gestión de Roles", () => {
       await seleccionarRolGeneral(encargado);
       await page.waitForLoadState("networkidle");
 
-      // Click en sección "Canjeadores" con selector más robusto
-      const seccionCanjeadores = page.locator('label', { hasText: "Canjeadores" });
+      // Click en sección "Canjeadores" con nuevo selector
+      const seccionCanjeadores = page.locator('li.item-input.svelte-1x3l73x a[href*="/canjeadores/"]');
       await seccionCanjeadores.click();
-      await page.waitForTimeout(1000);
+      await page.waitForLoadState("networkidle");
 
-      // Click en botón "+" con selector más robusto
-      const botonAgregar = page.locator('.custom-fab a').first();
-      await botonAgregar.scrollIntoViewIfNeeded();
+      // Click en botón "+" con nuevo selector
+      const botonAgregar = page.locator('.custom-fab.fab.fab-right-bottom a');
       await botonAgregar.click();
       await page.waitForTimeout(1000);
 
@@ -327,6 +327,23 @@ test.describe("Gestión de Roles", () => {
       // Usar el helper para esperar y cerrar el modal de error
       await modal.esperarModalError("El usuario ya posee el rol indicado.");
       await modal.cerrarModalError();
+    });
+
+    test("Puede cambiar el tipo de escaneo de un canjeador", async ({ page }) => {
+      allure.story("Edición de Canjeadores");
+      allure.description("Verifica que un encargado pueda cambiar el tipo de escaneo permitido para un canjeador existente");
+      allure.severity("critical");
+
+      const encargado = new Encargado(page);
+
+      // Login y selección de rol
+      await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+      await page.waitForLoadState("networkidle");
+      await seleccionarRolGeneral(encargado);
+      await page.waitForLoadState("networkidle");
+
+      // Editar tipo de escaneo del canjeador a QR solamente
+      await editarTipoEscaneoCanjeador(encargado, email, "QR");
     });
 
     test("Puede eliminar un canjeador existente y ver confirmación", async ({ page }) => {
@@ -344,10 +361,10 @@ test.describe("Gestión de Roles", () => {
         await seleccionarRolGeneral(encargado);
         await page.waitForLoadState("networkidle");
 
-        // Click en sección "Canjeadores" con selector más robusto
-        const seccionCanjeadores = page.locator('label', { hasText: "Canjeadores" });
+        // Click en sección "Canjeadores" con nuevo selector
+        const seccionCanjeadores = page.locator('li.item-input.svelte-1x3l73x a[href*="/canjeadores/"]');
         await seccionCanjeadores.click();
-        await page.waitForTimeout(1000); // Espera explícita
+        await page.waitForLoadState("networkidle");
 
         // Eliminar canjeador por email
         await EliminarCanjeadorPorEmail(encargado, email);
@@ -368,6 +385,7 @@ test.describe("Gestión de Roles", () => {
         throw error;
       }
     });
+
   });
 
   // EPIC: Roles Especializados - Supervisores
