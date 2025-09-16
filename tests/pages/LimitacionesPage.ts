@@ -308,4 +308,152 @@ export class LimitacionesPage {
     // Esperar que el modal se cierre
     await expect(modalExito).not.toBeVisible({ timeout: 5000 });
   }
+
+  // ========== MÉTODOS PARA EXPORTAR LIMITACIONES ==========
+
+  async clickExportarLimitaciones() {
+    // Buscar el botón "EXPORTAR LIMITACIONES"
+    const botonExportar = this.page.locator('a.btn-exportarLimitaciones.button', { hasText: 'EXPORTAR LIMITACIONES' });
+    await expect(botonExportar).toBeVisible({ timeout: 5000 });
+    await botonExportar.click();
+    
+    // Esperar que aparezca el modal de exportación
+    const modalExportar = this.page.locator('.popupcopiarlimitaciones.popup.modal-in');
+    await expect(modalExportar).toBeVisible({ timeout: 5000 });
+    await expect(modalExportar.locator('.title')).toContainText('Copiar limitaciones');
+  }
+
+  async seleccionarVendedoresDestino(vendedores: string[]) {
+    // Click en el smart select de vendedores
+    const smartSelectVendedores = this.page.locator('.item-link.smart-select').filter({
+      has: this.page.locator('.item-title', { hasText: 'Seleccione vendedores' })
+    });
+    await expect(smartSelectVendedores).toBeVisible({ timeout: 5000 });
+    await smartSelectVendedores.click();
+    
+    // Esperar que aparezca el modal de selección
+    await this.page.waitForTimeout(1000); // Esperar a que se abra el modal
+    
+    // Seleccionar cada vendedor por email
+    for (const vendedor of vendedores) {
+      // Buscar el checkbox por el texto del vendedor usando el patrón específico del HTML
+      const labelVendedor = this.page.locator(`label.item-checkbox.item-checkbox-icon-start.item-content:has(.item-title:has-text("${vendedor}"))`);
+      
+      if (await labelVendedor.isVisible()) {
+        await labelVendedor.click();
+        await this.page.waitForTimeout(500); // Pausa entre selecciones
+      } else {
+        // Fallback: buscar por contenido parcial
+        const labelVendedorFallback = this.page.locator(`label.item-checkbox:has-text("${vendedor}")`);
+        if (await labelVendedorFallback.isVisible()) {
+          await labelVendedorFallback.click();
+          await this.page.waitForTimeout(500);
+        }
+      }
+    }
+    
+    // Cerrar el modal de vendedores usando el selector exacto del HTML
+    const botonCerrarVendedores = this.page.locator('a.link.popup-close[data-popup=".smart-select-popup[data-select-name=\'vendedores\']"]');
+    await expect(botonCerrarVendedores).toBeVisible({ timeout: 5000 });
+    await botonCerrarVendedores.click();
+    await this.page.waitForTimeout(1000); // Esperar a que se cierre el modal
+  }
+
+  async seleccionarCuponesAExportar(cupones: string[]) {
+    // Click en el smart select de cupones
+    const smartSelectCupones = this.page.locator('.item-link.smart-select').filter({
+      has: this.page.locator('.item-title', { hasText: 'Seleccione cupones' })
+    });
+    await expect(smartSelectCupones).toBeVisible({ timeout: 5000 });
+    await smartSelectCupones.click();
+    
+    // Esperar que aparezca el modal de selección de cupones
+    await this.page.waitForTimeout(1000); // Esperar a que se abra el modal
+    
+    // Seleccionar todos los cupones especificados usando el patrón específico del HTML
+    for (const cupon of cupones) {
+      const labelCupon = this.page.locator(`label.item-checkbox.item-checkbox-icon-start.item-content:has(.item-title:has-text("${cupon}"))`);
+      await expect(labelCupon).toBeVisible({ timeout: 5000 });
+      await labelCupon.click();
+      await this.page.waitForTimeout(500); // Pausa entre selecciones
+    }
+    
+    // Cerrar el modal de cupones usando el selector exacto del HTML
+    const botonCerrarCupones = this.page.locator('a.link.popup-close[data-popup=".smart-select-popup[data-select-name=\'cupones\']"]');
+    await expect(botonCerrarCupones).toBeVisible({ timeout: 5000 });
+    await botonCerrarCupones.click();
+    await this.page.waitForTimeout(1000); // Esperar a que se cierre el modal
+  }
+
+  async confirmarExportacionLimitaciones() {
+    // Click en el botón "EXPORTAR LIMITACIONES" final
+    const botonConfirmarExportacion = this.page.locator('a.btn-cerrarSesion.button', { hasText: 'EXPORTAR LIMITACIONES' });
+    await expect(botonConfirmarExportacion).toBeVisible({ timeout: 5000 });
+    await botonConfirmarExportacion.click();
+  }
+
+  async esperarModalExportacionExitosa() {
+    // Esperar el modal de éxito
+    const modalExito = this.page.locator('.dialog.dialog-buttons-1.modal-in');
+    await expect(modalExito).toBeVisible({ timeout: 5000 });
+    
+    // Verificar contenido del modal de éxito
+    await expect(modalExito.locator('.dialog-title')).toContainText('Excelente!');
+    await expect(modalExito.locator('.dialog-text')).toContainText('Limitaciones exportadas correctamente.');
+    
+    // Click en "OK" para cerrar
+    const botonOK = modalExito.locator('.dialog-button', { hasText: 'OK' });
+    await expect(botonOK).toBeVisible({ timeout: 5000 });
+    await botonOK.click();
+    
+    // Esperar que el modal se cierre
+    await expect(modalExito).not.toBeVisible({ timeout: 5000 });
+  }
+
+  async volverAtrasDesdeDetalles() {
+    // Esperar que no haya modales activos antes de hacer click
+    await this.page.waitForTimeout(2000);
+    
+    // Cerrar cualquier modal que pueda estar abierto
+    const modalBackdrop = this.page.locator('.dialog-backdrop');
+    if (await modalBackdrop.isVisible()) {
+      await this.page.keyboard.press('Escape');
+      await this.page.waitForTimeout(1000);
+    }
+    
+    // Intentar múltiples estrategias para hacer click en "Volver atrás"
+    try {
+      // Estrategia 1: Click forzado en el primer botón backbutton
+      const botonVolver = this.page.locator('button.backbutton').first();
+      await botonVolver.click({ force: true });
+    } catch (error) {
+      try {
+        // Estrategia 2: Usar getByText para encontrar el botón
+        const botonVolverTexto = this.page.getByText('Volver atrás').first();
+        await botonVolverTexto.click({ force: true });
+      } catch (error2) {
+        // Estrategia 3: Navegar directamente mediante URL
+        const currentUrl = this.page.url();
+        const baseUrl = currentUrl.replace(/\/limitaciones\/.*$/, '/');
+        await this.page.goto(baseUrl);
+      }
+    }
+    
+    // Verificar que volvemos a la lista de vendedores
+    await expect(this.page).toHaveURL(/vendedores\/?$/);
+    await this.page.waitForLoadState("networkidle");
+  }
+
+  async verificarLimitacionesExportadas(emailVendedorDestino: string) {
+    // Buscar el vendedor destino y hacer click en sus limitaciones
+    await this.clickLimitacionesVendedor(emailVendedorDestino);
+    
+    // Verificar que aparece al menos una sección de cupones exportada (DNI'S PAGO como ejemplo)
+    const seccionCupon = this.page.locator('.couponType').filter({
+      has: this.page.locator('div:has-text("DNI\'S PAGO")')
+    });
+    
+    // Si encontramos la sección de cupones, la exportación fue exitosa
+    await expect(seccionCupon).toBeVisible({ timeout: 10000 });
+  }
 }

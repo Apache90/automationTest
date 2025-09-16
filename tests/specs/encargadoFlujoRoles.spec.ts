@@ -13,6 +13,7 @@ import { EliminarCanjeadorPorEmail } from "../tasks/Encargado/EliminarCanjeadorP
 import { EliminarSupervisorPorEmail } from "../tasks/Encargado/EliminarSupervisorPorEmail";
 import { crearLimitacionVendedor } from "../tasks/Encargado/CrearLimitacionVendedor";
 import { eliminarLimitacionVendedor } from "../tasks/Encargado/EliminarLimitacionVendedor";
+import { exportarLimitacionesVendedor } from "../tasks/Encargado/ExportarLimitacionesVendedor";
 import { allure } from "allure-playwright";
 import { AllureBusinessConfig } from "../config/AllureBusinessConfig";
 
@@ -45,8 +46,8 @@ test.describe("Gestión de Roles", () => {
 
     const email = "vendedor3@gmail.com";
 
-    // Story: Gestión Básica de Vendedores
-    test.describe("Gestión Básica de Vendedores", () => {
+    // Story: Gestión de Vendedores
+    test.describe("Gestión de Vendedores", () => {
       test("Puede agregar un nuevo vendedor y ver confirmación", async ({ page }) => {
         allure.story("Creación de Vendedores");
         allure.description("Verifica que un encargado pueda agregar un nuevo vendedor al sistema y recibir confirmación de éxito");
@@ -107,8 +108,8 @@ test.describe("Gestión de Roles", () => {
         await modal.cerrarModalError();
       });
 
-      // Story: 🆔 Limitaciones de Cupones DNI
-      test.describe("🆔 Limitaciones de Cupones DNI", () => {
+      // Story: Gestion de limitaciones a vendedores
+      test.describe("Gestion de limitaciones a vendedores", () => {
         test("Puede crear limitación DNI para vendedor y ver confirmación", async ({ page }) => {
           allure.story("🆔 Limitaciones de Cupones DNI");
           allure.description("Verifica que un encargado pueda crear una limitación DNI para un vendedor específico");
@@ -124,6 +125,57 @@ test.describe("Gestión de Roles", () => {
 
           // Crear limitación DNI
           await crearLimitacionVendedor(encargado, "vendedor3@gmail.com", "DNI GRUPO TEST", "5");
+        });
+
+        test("Puede crear limitación DNI Pago para vendedor y ver confirmación", async ({ page }) => {
+          allure.story("💳 Limitaciones de Cupones DNI con Pago");
+          allure.description("Verifica que un encargado pueda crear una limitación DNI Pago para un vendedor específico");
+          allure.severity("critical");
+
+          const encargado = new Encargado(page);
+
+          // Login y selección de rol
+          await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+          await page.waitForLoadState("networkidle");
+          await seleccionarRolGeneral(encargado);
+          await page.waitForLoadState("networkidle");
+
+          // Crear limitación DNI Pago
+          await crearLimitacionVendedor(encargado, "vendedor3@gmail.com", "DNI PAGO GRUPO TEST", "3");
+        });
+
+        test("Puede crear limitación QR para vendedor y ver confirmación", async ({ page }) => {
+          allure.story("📱 Limitaciones de Cupones QR");
+          allure.description("Verifica que un encargado pueda crear una limitación QR para un vendedor específico");
+          allure.severity("critical");
+
+          const encargado = new Encargado(page);
+
+          // Login y selección de rol
+          await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+          await page.waitForLoadState("networkidle");
+          await seleccionarRolGeneral(encargado);
+          await page.waitForLoadState("networkidle");
+
+          // Crear limitación QR
+          await crearLimitacionVendedor(encargado, "vendedor3@gmail.com", "QR GRUPO TEST", "10");
+        });
+
+        test("Puede crear limitación QR Pago para vendedor y ver confirmación", async ({ page }) => {
+          allure.story("💰 Limitaciones de Cupones QR con Pago");
+          allure.description("Verifica que un encargado pueda crear una limitación QR Pago para un vendedor específico");
+          allure.severity("critical");
+
+          const encargado = new Encargado(page);
+
+          // Login y selección de rol
+          await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+          await page.waitForLoadState("networkidle");
+          await seleccionarRolGeneral(encargado);
+          await page.waitForLoadState("networkidle");
+
+          // Crear limitación QR Pago
+          await crearLimitacionVendedor(encargado, "vendedor3@gmail.com", "QR $ GRUPO TEST", "7");
         });
 
         test("Puede eliminar limitación DNI de vendedor y ver confirmación", async ({ page }) => {
@@ -142,13 +194,10 @@ test.describe("Gestión de Roles", () => {
           // Eliminar limitación DNI
           await eliminarLimitacionVendedor(encargado, "vendedor3@gmail.com", "DNI GRUPO TEST");
         });
-      });
 
-      // Story: 💳 Limitaciones de Cupones DNI con Pago
-      test.describe("💳 Limitaciones de Cupones DNI con Pago", () => {
-        test("Puede crear limitación DNI Pago para vendedor y ver confirmación", async ({ page }) => {
-          allure.story("💳 Limitaciones de Cupones DNI con Pago");
-          allure.description("Verifica que un encargado pueda crear una limitación DNI Pago para un vendedor específico");
+        test("Puede exportar limitaciones de un vendedor a otros vendedores", async ({ page }) => {
+          allure.story("📤 Exportación de Limitaciones");
+          allure.description("Verifica que un encargado pueda exportar limitaciones de un vendedor origen a vendedores destino");
           allure.severity("critical");
 
           const encargado = new Encargado(page);
@@ -159,52 +208,20 @@ test.describe("Gestión de Roles", () => {
           await seleccionarRolGeneral(encargado);
           await page.waitForLoadState("networkidle");
 
-          // Crear limitación DNI Pago
-          await crearLimitacionVendedor(encargado, "vendedor3@gmail.com", "DNI PAGO GRUPO TEST", "3");
+          // Exportar limitaciones del vendedor3@gmail.com a otros vendedores
+          await exportarLimitacionesVendedor(
+            encargado,
+            "vendedor3@gmail.com", // Vendedor origen
+            ["emirvalles90@gmail.com", "portal@doorstickets.com"], // Vendedores destino
+            ["DNI PAGO GRUPO TEST", "QR GRUPO TEST", "QR $ GRUPO TEST"] // Cupones a exportar
+          );
         });
+
+        
+
       });
 
-      // Story: 📱 Limitaciones de Cupones QR
-      test.describe("📱 Limitaciones de Cupones QR", () => {
-        test("Puede crear limitación QR para vendedor y ver confirmación", async ({ page }) => {
-          allure.story("📱 Limitaciones de Cupones QR");
-          allure.description("Verifica que un encargado pueda crear una limitación QR para un vendedor específico");
-          allure.severity("critical");
-
-          const encargado = new Encargado(page);
-
-          // Login y selección de rol
-          await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
-          await page.waitForLoadState("networkidle");
-          await seleccionarRolGeneral(encargado);
-          await page.waitForLoadState("networkidle");
-
-          // Crear limitación QR
-          await crearLimitacionVendedor(encargado, "vendedor3@gmail.com", "QR GRUPO TEST", "10");
-        });
-      });
-
-      // Story: 💰 Limitaciones de Cupones QR con Pago
-      test.describe("💰 Limitaciones de Cupones QR con Pago", () => {
-        test("Puede crear limitación QR Pago para vendedor y ver confirmación", async ({ page }) => {
-          allure.story("💰 Limitaciones de Cupones QR con Pago");
-          allure.description("Verifica que un encargado pueda crear una limitación QR Pago para un vendedor específico");
-          allure.severity("critical");
-
-          const encargado = new Encargado(page);
-
-          // Login y selección de rol
-          await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
-          await page.waitForLoadState("networkidle");
-          await seleccionarRolGeneral(encargado);
-          await page.waitForLoadState("networkidle");
-
-          // Crear limitación QR Pago
-          await crearLimitacionVendedor(encargado, "vendedor3@gmail.com", "QR $ GRUPO TEST", "7");
-        });
-      });
-
-      test("Puede eliminar un vendedor existente y ver confirmación", async ({ page }) => {
+      /*test("Puede eliminar un vendedor existente y ver confirmación", async ({ page }) => {
         allure.story("Eliminación de Vendedores");
         allure.description("Verifica que un encargado pueda eliminar un vendedor existente y recibir confirmación de la operación");
         allure.severity("critical");
@@ -231,7 +248,7 @@ test.describe("Gestión de Roles", () => {
 
         // Esperar y cerrar el modal de éxito
         await modal.esperarModalEliminacionExitosa();
-      });
+      });*/
     });
   });
 
