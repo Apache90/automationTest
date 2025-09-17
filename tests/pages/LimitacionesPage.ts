@@ -86,6 +86,55 @@ export class LimitacionesPage {
     await expect(calendario).not.toBeVisible({ timeout: 5000 });
   }
 
+  async seleccionarFechaEdicion(fecha: string = "15/09/2025") {
+    // Click en el campo de fecha en modo edición (selector diferente)
+    const campoFecha = this.page.locator('input[type="text"]')
+      .or(this.page.locator('input[placeholder*="periodo de vigencia"]'))
+      .or(this.page.locator('input[placeholder*="fecha"]'))
+      .first();
+    
+    await expect(campoFecha).toBeVisible({ timeout: 5000 });
+    await campoFecha.click();
+    
+    // Esperar que aparezca el calendario
+    const calendario = this.page.locator('.calendar.calendar-modal.modal-in');
+    await expect(calendario).toBeVisible({ timeout: 5000 });
+    
+    // Parsear la fecha para obtener día, mes y año
+    const [dia, mes, año] = fecha.split('/');
+    const mesNumero = parseInt(mes);
+    const añoNumero = parseInt(año);
+    const diaNumero = parseInt(dia);
+    
+    // Esperar un momento para que el calendario se estabilice
+    await this.page.waitForTimeout(500);
+    
+    // Navegar al año correcto usando los selectores reales
+    await this.navegarAñoCalendario(calendario, añoNumero);
+    
+    // Navegar al mes correcto usando los selectores reales
+    await this.navegarMesCalendario(calendario, mesNumero);
+    
+    // Seleccionar el día específico usando el formato data-date correcto
+    const diaSelector = `.calendar-day[data-date="${añoNumero}-${mesNumero}-${diaNumero}"]:not(.calendar-day-prev):not(.calendar-day-next)`;
+    const diaElement = calendario.locator(diaSelector);
+    
+    await expect(diaElement).toBeVisible({ timeout: 10000 });
+    
+    // Seleccionar el día (dos veces para rango desde-hasta)
+    await diaElement.click({ force: true }); // Primera selección (desde)
+    await this.page.waitForTimeout(200);
+    await diaElement.click({ force: true }); // Segunda selección (hasta)
+    
+    // Click en "Listo"
+    const botonListo = calendario.locator('a.button.calendar-close', { hasText: 'Listo' });
+    await expect(botonListo).toBeVisible({ timeout: 5000 });
+    await botonListo.click();
+    
+    // Esperar que el calendario se cierre
+    await expect(calendario).not.toBeVisible({ timeout: 5000 });
+  }
+
   async navegarAñoCalendario(calendario: Locator, añoObjetivo: number) {
     // Obtener el año actual mostrado usando el selector correcto
     const añoActual = await calendario.locator('.current-year-value').textContent();
@@ -169,6 +218,17 @@ export class LimitacionesPage {
     await campoCantidad.fill(cantidad);
   }
 
+  async ingresarCantidadEdicion(cantidad: string) {
+    // Ingresar la cantidad en el campo correspondiente (modo edición)
+    const campoCantidad = this.page.locator('input[name="cantidad"]')
+      .or(this.page.locator('input[type="number"]'))
+      .first();
+    
+    await expect(campoCantidad).toBeVisible({ timeout: 5000 });
+    await campoCantidad.clear();
+    await campoCantidad.fill(cantidad);
+  }
+
   async seleccionarTodosLosDias() {
     // Seleccionar todos los días de la semana
     const diasSemana = [
@@ -189,11 +249,48 @@ export class LimitacionesPage {
     }
   }
 
+  async deseleccionarDia(dia: string) {
+    // Mapeo de letras de días a iconos
+    const mapeoDias: { [key: string]: string } = {
+      'L': 'i.fa-solid.fa-l', // Lunes
+      'M': 'i.fa-solid.fa-m', // Martes
+      'X': 'i.fa-solid.fa-x', // Miércoles
+      'J': 'i.fa-solid.fa-j', // Jueves
+      'V': 'i.fa-solid.fa-v', // Viernes
+      'S': 'i.fa-solid.fa-s', // Sábado
+      'D': 'i.fa-solid.fa-d'  // Domingo
+    };
+
+    const iconoDia = mapeoDias[dia.toUpperCase()];
+    if (!iconoDia) {
+      throw new Error(`Día no válido: ${dia}. Use L, M, X, J, V, S, D`);
+    }
+
+    // Buscar el botón que contiene el icono específico y que esté activo
+    const botonDia = this.page.locator(`a.button:has(${iconoDia})`);
+    await expect(botonDia).toBeVisible({ timeout: 5000 });
+    
+    // Solo hacer click si el botón está activo (tiene la clase activa)
+    const clases = await botonDia.getAttribute('class');
+    if (clases && clases.includes('activo')) {
+      await botonDia.click();
+      await this.page.waitForTimeout(200); // Pequeña pausa después del click
+    }
+  }
+
   async clickCrearLimitacion() {
     // Click en el botón "CREAR LIMITACIÓN"
     const botonCrear = this.page.locator('a.btn-agregarLimitaciones.button.button-fill', { hasText: 'CREAR LIMITACIÓN' });
     await expect(botonCrear).toBeVisible({ timeout: 5000 });
     await botonCrear.click();
+  }
+
+  async clickGuardarCambios() {
+    // Click en el botón "MODIFICAR LIMITACIÓN" para guardar cambios
+    const botonModificar = this.page.locator('a.btn-modificarLimitaciones.button', { hasText: 'MODIFICAR LIMITACIÓN' });
+    
+    await expect(botonModificar).toBeVisible({ timeout: 5000 });
+    await botonModificar.click();
   }
 
   async esperarModalExito() {
@@ -211,6 +308,60 @@ export class LimitacionesPage {
     
     // Verificar que regresamos a la página de limitaciones del vendedor
     await expect(this.page).toHaveURL(/limitaciones\/$/);
+  }
+
+  async esperarModalModificacionExitosa() {
+    // Esperar el modal de modificación exitosa
+    const modal = this.page.locator('.dialog.dialog-buttons-1.modal-in');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    
+    // Verificar que contiene el título y mensaje de éxito para modificación
+    await expect(modal.locator('.dialog-title')).toContainText('Excelente!');
+    await expect(modal.locator('.dialog-text')).toContainText('Limitación modificada correctamente!');
+    
+    // Cerrar el modal
+    await modal.locator('.dialog-button', { hasText: 'OK' }).click();
+    await expect(modal).not.toBeVisible({ timeout: 5000 });
+    
+    // Verificar que regresamos a la página de limitaciones del vendedor
+    await expect(this.page).toHaveURL(/limitaciones\/$/);
+  }
+
+  async clickEditarLimitacion(nombreLimitacion: string) {
+    // Determinar qué sección desplegar basándose en el nombre de la limitación
+    let seccionTexto = "";
+    if (nombreLimitacion.includes("DNI PAGO") || nombreLimitacion.includes("DNI'S PAGO")) {
+      seccionTexto = "DNI'S PAGO";
+    } else if (nombreLimitacion.includes("DNI")) {
+      seccionTexto = "DNI'S";
+    } else if (nombreLimitacion.includes("QR") && nombreLimitacion.includes("$")) {
+      seccionTexto = "QR'S $";
+    } else if (nombreLimitacion.includes("QR")) {
+      seccionTexto = "QR'S";
+    }
+
+    // Desplegar la sección correspondiente
+    if (seccionTexto) {
+      const seccionElement = this.page.locator('.couponType').filter({ hasText: seccionTexto });
+      await expect(seccionElement).toBeVisible({ timeout: 5000 });
+      await seccionElement.click();
+      await this.page.waitForTimeout(1000);
+    }
+
+    // Buscar la limitación específica por nombre
+    const limitacionContainer = this.page.locator('.grid-container.display-flex.align-items-center.justify-content-space-between')
+      .filter({ has: this.page.locator('.item-title', { hasText: nombreLimitacion }) });
+    
+    await expect(limitacionContainer).toBeVisible({ timeout: 5000 });
+
+    // Click en el botón de editar (lápiz)
+    const botonEditar = limitacionContainer.locator('a[href="#"]').filter({
+      has: this.page.locator('text=pencil')
+    });
+    
+    await expect(botonEditar).toBeVisible({ timeout: 5000 });
+    await botonEditar.click();
+    await this.page.waitForLoadState("networkidle");
   }
 
   async clickEliminarLimitacion(nombreCupon: string) {
