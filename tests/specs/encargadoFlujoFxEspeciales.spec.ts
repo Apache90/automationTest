@@ -1,0 +1,157 @@
+import { test, expect } from "@playwright/test";
+import { Encargado } from "../actors/Encargado";
+import { loginGeneral } from "../tasks/Login";
+import { seleccionarRolGeneral } from "../tasks/SeleccionarRol";
+import { VendedorModal } from "../helpers/vendedormodals";
+import { CanjeadorModal } from "../helpers/canjeadormodals";
+import { SupervisorModal } from "../helpers/supervisormodals";
+import { intentarCrearFechaSinNombre, crearFecha } from "../tasks/Encargado/CrearFecha";
+import { FechaModals } from "../helpers/fechamodals";
+import { allure } from "allure-playwright";
+import { AllureBusinessConfig } from "../config/AllureBusinessConfig";
+
+// Configuración global para manejar diálogos inesperados
+test.beforeEach(async ({ page }) => {
+  // Manejar diálogos inesperados
+  page.on('dialog', async dialog => {
+    console.log(`Diálogo inesperado: ${dialog.message()}`);
+    await dialog.accept();
+  });
+});
+
+// Bloque principal
+test.describe("Funcionalidades Especiales", () => {
+  test.beforeEach(() => {
+    allure.epic("Encargado");
+    allure.feature("Funcionalidades Especiales - Sección Otras");
+  });
+
+  // EPIC: Funcionalidades Especiales - Gestión de Fechas
+  test.describe("📅 Fechas", () => {
+    test.describe.configure({ mode: "serial" });
+
+    test.beforeEach(() => {
+      allure.epic("🎯 Funcionalidades Especiales");
+      allure.feature("Gestión de Fechas");
+    });
+
+    test("Muestra error cuando se intenta crear fecha sin nombre", async ({ page }) => {
+      allure.description(
+        "Verifica que se muestre un mensaje de error cuando se intenta crear una fecha sin ingresar nombre"
+      );
+      allure.severity("normal");
+
+      const encargado = new Encargado(page);
+      const fechaModals = new FechaModals(page);
+
+      try {
+        // Login y selección de rol
+        await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+        await page.waitForLoadState("networkidle");
+        await seleccionarRolGeneral(encargado);
+        await page.waitForLoadState("networkidle");
+
+        // Intentar crear fecha sin nombre
+        await intentarCrearFechaSinNombre(
+          encargado,
+          "2025-09-30", // Fecha: 30/09/2025
+          "DESCRIPCION TEST", // Descripción
+          "Av 123", // Dirección
+          "tests/assets/doorsFecha.png" // Imagen
+        );
+
+        // Verificar que aparezca el modal de error
+        await fechaModals.esperarModalError("Debe ingresar un nombre.");
+        await fechaModals.cerrarModalError();
+      } catch (error) {
+        await page.screenshot({ path: `error-fecha-test-${Date.now()}.png`, fullPage: true });
+        throw error;
+      }
+    });
+
+    test("Puede crear una nueva fecha y ver confirmación", async ({ page }) => {
+      allure.description(
+        "Verifica que un encargado pueda crear una nueva fecha con todos los campos requeridos y recibir confirmación de éxito"
+      );
+      allure.severity("critical");
+
+      const encargado = new Encargado(page);
+      const fechaModals = new FechaModals(page);
+
+      try {
+        // Login y selección de rol
+        await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+        await page.waitForLoadState("networkidle");
+        await seleccionarRolGeneral(encargado);
+        await page.waitForLoadState("networkidle");
+
+        // Crear fecha con todos los datos
+        await crearFecha(
+          encargado,
+          "2025-09-30", // Fecha: 30/09/2025
+          "FECHA TEST", // Nombre
+          "DESCRIPCION TEST", // Descripción
+          "Av 123", // Dirección
+          "tests/assets/doorsFecha.png" // Imagen
+        );
+
+        // Verificar confirmación de éxito
+        await fechaModals.esperarModalExito("Fecha creada correctamente.");
+        await fechaModals.cerrarModalExito();
+      } catch (error) {
+        await page.screenshot({ path: `success-fecha-test-${Date.now()}.png`, fullPage: true });
+        throw error;
+      }
+    });
+
+    
+  });
+
+  // EPIC: Funcionalidades Especiales - Gestión de Eventos
+  test.describe("🎪 Eventos", () => {
+    test.describe.configure({ mode: "serial" });
+
+    test.beforeEach(() => {
+      allure.epic("🎯 Funcionalidades Especiales");
+      allure.feature("Gestión de Eventos");
+    });
+
+    
+  });
+
+  // EPIC: Funcionalidades Especiales - Gestión de Invitados
+  test.describe("👥 Invitados", () => {
+    test.describe.configure({ mode: "serial" });
+
+    test.beforeEach(() => {
+      allure.epic("🎯 Funcionalidades Especiales");
+      allure.feature("Gestión de Invitados");
+    });
+
+    
+  });
+
+  // EPIC: Funcionalidades Especiales - Gestión de Campañas
+  test.describe("📢 Campañas", () => {
+    test.describe.configure({ mode: "serial" });
+
+    test.beforeEach(() => {
+      allure.epic("🎯 Funcionalidades Especiales");
+      allure.feature("Gestión de Campañas");
+    });
+
+    
+  });
+
+  // EPIC: Funcionalidades Especiales - Gestión de Menús
+  test.describe("🍽️ Menús", () => {
+    test.describe.configure({ mode: "serial" });
+
+    test.beforeEach(() => {
+      allure.epic("🎯 Funcionalidades Especiales");
+      allure.feature("Gestión de Menús");
+    });
+
+    
+  });
+});
