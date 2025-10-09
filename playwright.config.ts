@@ -41,7 +41,7 @@ export default defineConfig({
   /* Shared settings for all the projects below */
   use: {
     locale: 'es-ES',
-    baseURL: 'https://doorsticket.com/',
+    baseURL: 'https://doorsticketdev.com/',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     // Añadir video para mejor depuración

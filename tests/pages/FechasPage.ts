@@ -42,4 +42,42 @@ export class FechasPage {
     await expect(botonEliminar).toBeVisible();
     await botonEliminar.click();
   }
+
+  async clickVerFecha(nombreFecha: string) {
+    // Buscar el contenedor específico que contiene la fecha
+    const fechaContainer = this.page.locator('.grid-container').filter({
+      has: this.page.locator('.item-header', { hasText: nombreFecha })
+    });
+    
+    // Click en el botón de ver (ojo)
+    const botonVer = fechaContainer.locator('a[href*="/fechaespecial/"] i.fa-eye');
+    await expect(botonVer).toBeVisible({ timeout: 10000 });
+    await botonVer.click();
+  }
+
+  async clickCopiarFecha(nombreFecha: string) {
+    // Buscar el contenedor específico que contiene la fecha
+    const fechaContainer = this.page.locator('.grid-container').filter({
+      has: this.page.locator('.item-header', { hasText: nombreFecha })
+    });
+    
+    // Click en el botón de copiar usando la estructura real del HTML
+    // Estructura: i.fa-copy > div > a.button
+    const botonCopiar = fechaContainer.locator('i.fa-copy div a.button');
+    await expect(botonCopiar).toBeVisible({ timeout: 10000 });
+    await botonCopiar.click();
+  }
+
+  async verificarFechaEnLista(nombreFecha: string) {
+    // Verificar que la fecha aparece en la lista usando un selector más específico
+    // Buscar el elemento que contiene tanto la fecha como el nombre (evita duplicados)
+    const fechaElement = this.page.locator('.grid-container').filter({
+      has: this.page.locator('.item-header', { hasText: nombreFecha })
+    });
+    await expect(fechaElement).toBeVisible({ timeout: 10000 });
+    
+    // Alternativamente, verificar específicamente el slot header que es único
+    const fechaHeaderSlot = this.page.locator('div[slot="header"].item-header', { hasText: nombreFecha });
+    await expect(fechaHeaderSlot).toBeVisible({ timeout: 10000 });
+  }
 }

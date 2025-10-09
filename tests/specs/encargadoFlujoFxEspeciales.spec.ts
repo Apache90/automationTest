@@ -2,10 +2,9 @@ import { test, expect } from "@playwright/test";
 import { Encargado } from "../actors/Encargado";
 import { loginGeneral } from "../tasks/Login";
 import { seleccionarRolGeneral } from "../tasks/SeleccionarRol";
-import { VendedorModal } from "../helpers/vendedormodals";
-import { CanjeadorModal } from "../helpers/canjeadormodals";
-import { SupervisorModal } from "../helpers/supervisormodals";
 import { intentarCrearFechaSinNombre, crearFecha } from "../tasks/Encargado/CrearFecha";
+import { modificarMensajesFecha } from "../tasks/Encargado/ModificarMensajesFecha";
+import { copiarFecha } from "../tasks/Encargado/CopiarFecha";
 import { FechaModals } from "../helpers/fechamodals";
 import { allure } from "allure-playwright";
 import { AllureBusinessConfig } from "../config/AllureBusinessConfig";
@@ -104,7 +103,67 @@ test.describe("Funcionalidades Especiales", () => {
       }
     });
 
-    
+    test("Puede modificar mensajes de pago y gratuitos de una fecha", async ({ page }) => {
+      allure.description(
+        "Verifica que un encargado pueda modificar los mensajes antes y después de los links de pago y gratuitos de una fecha existente"
+      );
+      allure.severity("critical");
+
+      const encargado = new Encargado(page);
+
+      try {
+        // Login y selección de rol
+        await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+        await page.waitForLoadState("networkidle");
+        await seleccionarRolGeneral(encargado);
+        await page.waitForLoadState("networkidle");
+
+        // Modificar mensajes de la fecha existente
+        await modificarMensajesFecha(
+          encargado,
+          "FECHA TEST", // Nombre de la fecha existente
+          "Mensaje FREE 1", // Mensaje antes de link gratis
+          "Mensaje FREE 2", // Mensaje después de link gratis
+          "Mensaje PAGO 1", // Mensaje antes de link pago
+          "Mensaje PAGO 2"  // Mensaje después de link pago
+        );
+      } catch (error) {
+        await page.screenshot({ path: `modificar-mensajes-fecha-test-${Date.now()}.png`, fullPage: true });
+        throw error;
+      }
+    });
+
+    test("Puede copiar una fecha existente y ver confirmación", async ({ page }) => {
+      allure.description(
+        "Verifica que un encargado pueda copiar una fecha existente, asignar un nuevo nombre y recibir confirmación de éxito"
+      );
+      allure.severity("critical");
+
+      const encargado = new Encargado(page);
+
+      try {
+        // Login y selección de rol
+        await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+        await page.waitForLoadState("networkidle");
+        await seleccionarRolGeneral(encargado);
+        await page.waitForLoadState("networkidle");
+
+        // Copiar la fecha existente con un nuevo nombre
+        await copiarFecha(
+          encargado,
+          "FECHA TEST", // Nombre de la fecha a copiar
+          "FECHA COPIA" // Nuevo nombre para la copia
+        );
+      } catch (error) {
+        await page.screenshot({ path: `copiar-fecha-test-${Date.now()}.png`, fullPage: true });
+        throw error;
+      }
+    });
+
+    //cambiar imagen de FECHA COPIA
+
+    //eliminar FECHA COPIA
+
   });
 
   // EPIC: Funcionalidades Especiales - Gestión de Eventos

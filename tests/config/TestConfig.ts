@@ -4,7 +4,7 @@
 export const TestConfig = {
   // URLs de la aplicación
   urls: {
-    base: 'https://doorsticket.com/',
+    base: 'https://doorsticketdev.com/',
     login: '/login',
     dashboard: '/dashboard'
   },

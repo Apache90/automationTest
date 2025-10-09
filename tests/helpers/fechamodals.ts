@@ -59,6 +59,18 @@ export class FechaModals {
     await expect(this.modalExito.locator(".dialog-text")).toContainText("Fecha modificada correctamente.");
   }
 
+  async esperarModalEspecialModificacionExitosa() {
+    await expect(this.modalExito).toBeVisible({ timeout: 10000 });
+    await expect(this.modalExito.locator(".dialog-title")).toContainText("Excelente!");
+    await expect(this.modalExito.locator(".dialog-text")).toContainText("Fecha especial modificada correctamente.");
+  }
+
+  async esperarModalCopiaExitosa() {
+    await expect(this.modalExito).toBeVisible({ timeout: 10000 });
+    await expect(this.modalExito.locator(".dialog-title")).toContainText("DOORS");
+    await expect(this.modalExito.locator(".dialog-text")).toContainText("Fecha duplicada con éxito");
+  }
+
   async esperarModalEliminacionExitosa() {
     await expect(this.modalExito).toBeVisible({ timeout: 5000 });
     await expect(this.modalExito.locator(".dialog-text")).toContainText("Fecha eliminada con éxito");
