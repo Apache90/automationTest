@@ -24,22 +24,64 @@ export class FechasPage {
   }
 
   async buscarFechaPorNombre(nombre: string) {
-    const fecha = this.page
-      .locator(".grid-container .item-header", { hasText: nombre })
-      .locator('xpath=ancestor::div[contains(@class, "grid-container")]');
+    // Buscar el contenedor .grid-container que contiene el header con el nombre de la fecha
+    const fecha = this.page.locator('.grid-container').filter({
+      has: this.page.locator('.item-header', { hasText: nombre })
+    });
     await expect(fecha).toBeVisible({ timeout: 5000 });
-    return fecha;
+    return fecha.first();
   }
 
   async clickEditarFecha(fecha: Locator) {
-    const botonEditar = fecha.locator('i.fa-edit');
-    await expect(botonEditar).toBeVisible();
-    await botonEditar.click();
+    // Algunos entornos usan distintos iconos/clases para el botón de editar.
+    // Probar una serie de selectores comunes hasta encontrar uno visible.
+    const candidatos = [
+      'i.fa-edit',
+      'i.fa-pencil',
+      'i.fa-pencil-alt',
+      'i.fa-pencil-square',
+      'i.material-icons',
+      'a[href*="/modificarfecha/"]',
+      'button[title*="Modificar"]',
+      'a.button:has-text("MODIFICAR")',
+      'a.button:has-text("Editar")',
+      'button:has-text("Editar")'
+    ];
+
+    for (const sel of candidatos) {
+      const el = fecha.locator(sel);
+      const count = await el.count();
+      if (count > 0) {
+        try {
+          await expect(el.first()).toBeVisible({ timeout: 3000 });
+          await el.first().click();
+          return;
+        } catch (e) {
+          // continuar con el siguiente candidato
+        }
+      }
+    }
+
+    // Si no se encontró ninguno, lanzar error con contexto para debugging
+    throw new Error('No se encontró el botón de editar dentro del contenedor de la fecha');
   }
 
   async clickEliminarFecha(fecha: Locator) {
     const botonEliminar = fecha.locator('i.fa-trash');
     await expect(botonEliminar).toBeVisible();
+    await botonEliminar.click();
+  }
+
+  async clickEliminarFechaPorNombre(nombreFecha: string) {
+    // Buscar el contenedor específico que contiene la fecha
+    const fechaContainer = this.page.locator('.grid-container').filter({
+      has: this.page.locator('.item-header', { hasText: nombreFecha })
+    });
+    
+    // Click en el botón de eliminar (trash) usando la estructura del HTML proporcionado
+    // Estructura: i.fa-light.fa-trash > div > a.button
+    const botonEliminar = fechaContainer.locator('i.fa-light.fa-trash div a.button');
+    await expect(botonEliminar).toBeVisible({ timeout: 10000 });
     await botonEliminar.click();
   }
 

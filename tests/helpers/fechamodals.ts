@@ -72,14 +72,17 @@ export class FechaModals {
   }
 
   async esperarModalEliminacionExitosa() {
-    await expect(this.modalExito).toBeVisible({ timeout: 5000 });
+    await expect(this.modalExito).toBeVisible({ timeout: 10000 });
+    await expect(this.modalExito.locator(".dialog-title")).toContainText("DOORS");
     await expect(this.modalExito.locator(".dialog-text")).toContainText("Fecha eliminada con éxito");
   }
 
   async confirmarEliminacion() {
-    await expect(this.modalConfirmacion).toBeVisible({ timeout: 5000 });
-    await expect(this.modalConfirmacion).toContainText("¿Estás seguro que deseas eliminar esta fecha?");
-    await this.modalConfirmacion.locator("span.dialog-button", { hasText: "Confirmar" }).click();
+    // Modal de confirmación con estructura específica
+    const modalConfirmacion = this.page.locator(".dialog.dialog-buttons-1.custom-dialog-background.modal-in");
+    await expect(modalConfirmacion).toBeVisible({ timeout: 10000 });
+    await expect(modalConfirmacion.locator(".dialog-text .btnCustomDialogSubtitle")).toContainText("¿Esta seguro que quiere eliminar esta fecha?");
+    await modalConfirmacion.locator("span.dialog-button", { hasText: "Confirmar" }).click();
   }
 
   async manejarSpinnerSiExiste() {

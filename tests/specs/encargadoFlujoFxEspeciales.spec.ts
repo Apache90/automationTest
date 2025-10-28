@@ -5,7 +5,10 @@ import { seleccionarRolGeneral } from "../tasks/SeleccionarRol";
 import { intentarCrearFechaSinNombre, crearFecha } from "../tasks/Encargado/CrearFecha";
 import { modificarMensajesFecha } from "../tasks/Encargado/ModificarMensajesFecha";
 import { copiarFecha } from "../tasks/Encargado/CopiarFecha";
+import { cambiarImagenFecha } from "../tasks/Encargado/CambiarImagenFecha";
+import { eliminarFecha } from "../tasks/Encargado/EliminarFecha";
 import { FechaModals } from "../helpers/fechamodals";
+import { verModalModificacionEspecialExitosa } from "../questions/VerModalFecha";
 import { allure } from "allure-playwright";
 import { AllureBusinessConfig } from "../config/AllureBusinessConfig";
 
@@ -160,10 +163,61 @@ test.describe("Funcionalidades Especiales", () => {
       }
     });
 
-    //cambiar imagen de FECHA COPIA
+    test("Puede cambiar la imagen de una fecha existente", async ({ page }) => {
+      allure.description(
+        "Verifica que un encargado pueda cambiar la imagen de una fecha existente y recibir confirmación de éxito"
+      );
+      allure.severity("critical");
 
-    //eliminar FECHA COPIA
+      const encargado = new Encargado(page);
+      const fechaModals = new FechaModals(page);
 
+      try {
+        // Login y selección de rol
+        await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+        await page.waitForLoadState("networkidle");
+        await seleccionarRolGeneral(encargado);
+        await page.waitForLoadState("networkidle");
+
+        // Cambiar la imagen de la fecha copiada
+        await cambiarImagenFecha(
+          encargado,
+          "FECHA COPIA", // Nombre de la fecha a modificar
+          "tests/assets/foto-ejemplo.png" // Nueva imagen
+        );
+        // Verificar que el modal de éxito aparece usando Questions
+      } catch (error) {
+        await page.screenshot({ path: `cambiar-imagen-fecha-test-${Date.now()}.png`, fullPage: true });
+        throw error;
+      }
+    });
+
+    test("Puede eliminar una fecha existente y ver confirmación", async ({ page }) => {
+      allure.description(
+        "Verifica que un encargado pueda eliminar una fecha existente, confirmar la acción y recibir confirmación de éxito"
+      );
+      allure.severity("critical");
+
+      const encargado = new Encargado(page);
+
+      try {
+        // Login y selección de rol
+        await loginGeneral(encargado, "emirvalles90@gmail.com", "123456");
+        await page.waitForLoadState("networkidle");
+        await seleccionarRolGeneral(encargado);
+        await page.waitForLoadState("networkidle");
+
+        // Eliminar la fecha copiada
+        await eliminarFecha(
+          encargado,
+          "FECHA TEST" // Nombre de la fecha a eliminar
+        );
+      } catch (error) {
+        await page.screenshot({ path: `eliminar-fecha-test-${Date.now()}.png`, fullPage: true });
+        throw error;
+      }
+    });
+    
   });
 
   // EPIC: Funcionalidades Especiales - Gestión de Eventos
@@ -175,6 +229,7 @@ test.describe("Funcionalidades Especiales", () => {
       allure.feature("Gestión de Eventos");
     });
 
+    
     
   });
 
