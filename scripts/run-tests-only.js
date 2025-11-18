@@ -19,6 +19,11 @@ class TestRunner {
       'tests/specs/encargadoFlujoGrupos.spec.ts',
       'tests/specs/encargadoFlujoRoles.spec.ts'
     ];
+    
+    // Rastrear resultados
+    this.results = [];
+    this.totalPassed = 0;
+    this.totalFailed = 0;
   }
 
   async runTests() {
@@ -31,13 +36,43 @@ class TestRunner {
       // Ejecutar tests en orden
       await this.executeOrderedTests();
       
-      console.log('\n✅ Tests completados exitosamente!');
-      console.log('📊 Resultados disponibles en: allure-results/');
-      console.log('📝 Para generar reporte: npm run publish:report');
-      
     } catch (error) {
-      console.error('\n❌ Error en la ejecución:', error.message);
+      console.error('\n💥 Error crítico en la ejecución:', error.message);
       process.exit(1);
+    }
+  }
+  
+  showSummary(totalDuration) {
+    console.log('\n' + '='.repeat(60));
+    console.log('📊 RESUMEN FINAL DE EJECUCIÓN');
+    console.log('='.repeat(60));
+    
+    console.log(`⏱️  Tiempo total: ${totalDuration} segundos`);
+    console.log(`📁 Archivos ejecutados: ${this.results.length}/${this.testOrder.length}`);
+    console.log(`✅ Archivos exitosos: ${this.totalPassed}`);
+    console.log(`❌ Archivos con fallos: ${this.totalFailed}`);
+    
+    const successRate = ((this.totalPassed / this.results.length) * 100).toFixed(1);
+    console.log(`📈 Tasa de éxito: ${successRate}%`);
+    
+    console.log('\n📋 Detalle por archivo:');
+    this.results.forEach((result, index) => {
+      const icon = result.status === 'PASSED' ? '✅' : '❌';
+      console.log(`   ${index + 1}. ${icon} ${result.name} (${result.duration}s)`);
+      if (result.status === 'FAILED' && result.error) {
+        console.log(`      └─ Error: ${result.error}`);
+      }
+    });
+    
+    console.log('\n📊 Resultados disponibles en: allure-results/');
+    console.log('📝 Para generar reporte: npm run publish:report');
+    
+    if (this.totalFailed > 0) {
+      console.log('\n⚠️  Algunos tests fallaron, pero se ejecutaron todos.');
+      process.exit(1); // Código de salida 1 para indicar que hubo fallos
+    } else {
+      console.log('\n🎉 ¡Todos los tests pasaron exitosamente!');
+      process.exit(0);
     }
   }
 
@@ -81,13 +116,30 @@ class TestRunner {
         testFile
       ];
       
-      await this.runCommand(command, args);
-      console.log(`✅ Completado: ${testName}\n`);
+      const testStartTime = Date.now();
+      
+      try {
+        await this.runCommand(command, args);
+        const testDuration = Math.round((Date.now() - testStartTime) / 1000);
+        
+        console.log(`✅ Completado: ${testName} (${testDuration}s)\n`);
+        this.results.push({ name: testName, status: 'PASSED', duration: testDuration });
+        this.totalPassed++;
+        
+      } catch (error) {
+        const testDuration = Math.round((Date.now() - testStartTime) / 1000);
+        
+        console.log(`❌ Fallos en: ${testName} (${testDuration}s) - Continuando con el siguiente...\n`);
+        this.results.push({ name: testName, status: 'FAILED', duration: testDuration, error: error.message });
+        this.totalFailed++;
+      }
     }
     
     const endTime = Date.now();
     const duration = Math.round((endTime - startTime) / 1000);
-    console.log(`\n⏱️  Tiempo total: ${duration} segundos`);
+    
+    // Mostrar resumen final
+    this.showSummary(duration);
   }
 
   runCommand(command, args) {

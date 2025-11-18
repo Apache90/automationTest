@@ -76,10 +76,13 @@ Los tests **DEBEN** ejecutarse en este orden debido a dependencias de datos:
 - **Razón**: Evita conflictos de datos entre tests dependientes
 
 ### Archivos de Configuración Clave
-- **`playwright.config.ts`**: Configuración principal de Playwright
+- **`playwright.config.ts`**: Configuración principal de Playwright + Reporter Allure
 - **`tests/config/TestConfig.ts`**: Credenciales, URLs, timeouts centralizados
 - **`tests/helpers/CommonHelpers.ts`**: Funciones reutilizables
 - **`tests/base/BaseTestSuite.ts`**: Setup común para todos los tests
+- **`categories.json`**: Categorización de errores para Allure
+- **`package.json`**: Scripts npm y dependencias
+- **`scripts/`**: Scripts personalizados de ejecución y publicación
 
 ---
 
@@ -122,6 +125,28 @@ npm run regression:ordered
 
 # Proceso completo automatizado
 npm run regression:and:publish
+
+# Runner personalizado con métricas
+npm run regression:custom
+```
+
+### Scripts Personalizados Disponibles
+```bash
+# Solo ejecutar tests (no generar HTML)
+npm run run:tests               # scripts/run-tests-only.js
+
+# Solo publicar reportes (requiere tests ejecutados)
+npm run publish:report          # scripts/publish-report-only.js
+
+# Tests + reportes + GitHub Pages
+npm run test:and:publish        # scripts/test-and-publish.js
+npm run regression:and:publish   # scripts/regression-and-publish.js
+
+# Regresión simple
+npm run regression:ordered       # scripts/regression-ordered.js
+
+# Regresión avanzada con métricas
+npm run regression:custom        # scripts/regression-runner.ts
 ```
 
 ---
@@ -233,6 +258,39 @@ npm install
 npx playwright install
 ```
 
+### Error: "no test runtime is found. Please check test framework configuration"
+Este error indica problema con la configuración de Allure:
+
+**Causa**: Configuración incorrecta del reporter allure-playwright
+
+**Solución**:
+1. Verificar `playwright.config.ts` tenga la configuración correcta:
+```typescript
+reporter: [
+  ['line'],
+  ['allure-playwright', {
+    detail: true,
+    outputFolder: 'allure-results',
+    suiteTitle: false,
+    environmentInfo: {
+      'Framework': 'Playwright',
+      'Language': 'TypeScript'
+    }
+  }]
+]
+```
+
+2. Verificar que los scripts usen el reporter correcto:
+```bash
+npx playwright test --reporter=line,allure-playwright
+```
+
+3. Reinstalar allure-playwright si persiste:
+```bash
+npm uninstall allure-playwright
+npm install allure-playwright@latest
+```
+
 ---
 
 ## 📈 **FLUJO DE TRABAJO RECOMENDADO**
@@ -323,13 +381,70 @@ npm run allure:clean           # Limpiar reportes
 
 ## 📚 **RECURSOS**
 
+### Enlaces Externos
 - **Repositorio**: https://github.com/Apache90/automationTest
 - **Reportes Live**: https://apache90.github.io/automationTest/
 - **Playwright Docs**: https://playwright.dev/
 - **Allure Docs**: https://docs.qameta.io/allure/
 - **Screenplay Pattern**: https://serenity-js.org/handbook/design/screenplay-pattern/
 
+### Documentación del Proyecto
+- **`AUTOMATION_GUIDE.md`**: Esta guía completa (archivo actual)
+- **`PROCESS_GUIDE.md`**: Proceso de testing y publicación automatizada
+- **`REGRESSION_GUIDE.md`**: Guía detallada de regresión y optimización
+- **`CLAUDE.md`**: Notas y conversaciones con Claude AI
+- **`github-pages-index.md`**: Configuración de GitHub Pages
+- **`screenplayVsPOM.txt`**: Comparación de patrones de testing
+
 ---
 
-*Última actualización: Agosto 8, 2025*  
-*Framework: Playwright 1.53.2 + TypeScript + Allure*
+---
+
+## ✅ **VERIFICACIÓN DE CONFIGURACIÓN**
+
+### Comandos de Diagnóstico
+```bash
+# Verificar instalación de Playwright
+npx playwright --version
+
+# Verificar navegadores instalados
+npx playwright install --dry-run
+
+# Verificar configuración de tests
+npx playwright test --list
+
+# Verificar dependencias npm
+npm list --depth=0
+
+# Probar configuración de Allure
+npm run allure:generate
+```
+
+### Estructura Esperada del Proyecto
+```
+automationTest/
+├── AUTOMATION_GUIDE.md      ⭐ Guía principal (este archivo)
+├── PROCESS_GUIDE.md          📋 Proceso automatizado
+├── REGRESSION_GUIDE.md       🔧 Guía de regresión detallada
+├── package.json              📦 Dependencias y scripts
+├── playwright.config.ts      ⚙️ Configuración Playwright + Allure
+├── categories.json           📊 Categorías para Allure
+├── scripts/                  🤖 Scripts de automatización
+│   ├── regression-ordered.js
+│   ├── regression-and-publish.js
+│   ├── test-and-publish.js
+│   ├── run-tests-only.js
+│   ├── publish-report-only.js
+│   └── regression-runner.ts
+└── tests/                    🧪 Tests y configuración
+    ├── config/TestConfig.ts
+    ├── helpers/CommonHelpers.ts
+    ├── base/BaseTestSuite.ts
+    └── specs/*.spec.ts
+```
+
+---
+
+*Última actualización: Noviembre 18, 2025*  
+*Framework: Playwright 1.56.1 + TypeScript + Allure 3.3.0*  
+*Configuración: Scripts corregidos para resolver error 'no test runtime found'*

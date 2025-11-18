@@ -67,7 +67,7 @@ class RegressionPublisher {
     ];
 
     const testFiles = testOrder.map(file => `tests/specs/${file}`).join(' ');
-    const command = `npx playwright test ${testFiles} --workers=1`;
+    const command = `npx playwright test ${testFiles} --workers=1 --reporter=line,allure-playwright`;
     
     console.log(`🔧 Ejecutando: ${command}`);
     

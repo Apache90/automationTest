@@ -26,7 +26,7 @@ console.log('\n⚠️  Nota: vendedor-flujo.spec.ts está temporalmente excluido
 
 // Crear comando para ejecutar todos los tests en orden
 const testFiles = testOrder.map(file => `tests/specs/${file}`).join(' ');
-const command = `npx playwright test ${testFiles} --workers=1 --reporter=line`;
+const command = `npx playwright test ${testFiles} --workers=1 --reporter=line,allure-playwright`;
 
 console.log(`🔧 Ejecutando: ${command}\n`);
 

@@ -13,7 +13,7 @@ class SimpleTestPublisher extends RegressionPublisher {
   async runRegression() {
     console.log('\n🧪 Ejecutando tests estándar...');
     
-    const command = 'npx playwright test --workers=1';
+    const command = 'npx playwright test --workers=1 --reporter=line,allure-playwright';
     console.log(`🔧 Ejecutando: ${command}`);
     
     try {

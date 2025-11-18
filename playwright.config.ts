@@ -1,11 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
-import { TestConfig } from './tests/config/TestConfig';
 
 export default defineConfig({
   testDir: './tests/specs',
   
-  // Remover testMatch para evitar conflictos con scripts personalizados
-  // testMatch: TestConfig.testOrder,
+  // Usar glob patterns estándar para encontrar tests
+  testMatch: '**/*.spec.ts',
   
   // Añadir timeouts explícitos
   timeout: 60000, // 60 segundos para timeout global
@@ -25,17 +24,16 @@ export default defineConfig({
   /* Workers settings - Force 1 worker for serial execution */
   workers: 1,
   
-  /* Reporter to use */
+  /* Reporter to use - Configuración corregida */
   reporter: [
-    ['list'], // List reporter
-    // Configuración detallada para Allure
+    ['list'], // List reporter por defecto
+    ['html', { open: 'never' }], // HTML reporter local
+    // Allure reporter - configuración completa y correcta
     ['allure-playwright', {
-      detail: true,
       outputFolder: 'allure-results',
+      detail: true,
       suiteTitle: false
-    }],
-    // Comentario limpio: HTML reporter desactivado
-    // ['html']
+    }]
   ],
 
   /* Shared settings for all the projects below */
@@ -44,8 +42,10 @@ export default defineConfig({
     baseURL: 'https://doorsticketdev.com/',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    // Añadir video para mejor depuración
-    video: 'on-first-retry'
+    video: 'on-first-retry',
+    // Configuraciones adicionales para estabilidad
+    actionTimeout: 15000,
+    navigationTimeout: 30000
   },
   /* Configure projects for major browsers */
   projects: [
@@ -85,6 +85,10 @@ export default defineConfig({
     // },
   ],
 
+  /* Configuración para VS Code Test Runner */
+  // Para ejecutar desde VS Code: Ctrl+Shift+P -> "Test: Run Test at Cursor"
+  // Para debug desde VS Code: Ctrl+Shift+P -> "Test: Debug Test at Cursor"
+  
   /* Run your local dev server before starting the tests */
   // webServer: {
   //   command: 'npm run start',
