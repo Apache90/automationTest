@@ -37,17 +37,8 @@ test.describe('🔐 Autenticación - Registro de Usuario', () => {
     // Esperar un poco para que se procese el registro
     await page.waitForTimeout(3000);
 
-    const errorMsgs = page.locator('.item-input-error-message, .error-message, .alert');
-    const visibles = await errorMsgs.filter({ hasText: /.+/ }).allTextContents();
-
-    // Si hay errores, los imprime en consola
-    if (visibles.length > 0) {
-      console.log('Errores visibles en el formulario:');
-      visibles.forEach((msg, i) => console.log(`${i + 1}. ${msg.trim()}`));
-    }
-
-    const modalExito = page.locator('.dialog-inner', { hasText: 'Registro completado correctamente' });
-    await expect(modalExito).toBeVisible({ timeout: 10000 });
+    // Verificar registro exitoso con el nuevo modal
+    await registerPage.verificarRegistroExitoso();
   });
 
   test('Error cuando las contraseñas no coinciden', async ({ page }) => {
@@ -148,34 +139,57 @@ test.describe('🔐 Autenticación - Registro de Usuario', () => {
     });
 
     await registerPage.clickCrearCuenta();
-    await registerPage.esperarModalConTextoEsperado('Se necesita una foto para el registro');
+    await registerPage.esperarModalConTextoEsperado('La foto es requerida');
+  });
+
+  test('Error cuando se ingresa formato incorrecto de email', async ({ page }) => {
+
+    allure.label('owner', 'Emir Segovia');
+    allure.severity('high');
+    allure.feature('Register');
+    allure.story('Validaciones en registro de cuenta');
+
+    const registerPage = new RegisterPage(page);
+    await registerPage.navigate();
+
+    await registerPage.completarFormulario({
+      nombre: 'Pedro',
+      apellido: 'González',
+      dni: '33456789',
+      genero: 'Hombre',
+      fechaNacimiento: '1993-07-20',
+      email: 'emailinvalido', // Email con formato incorrecto
+      password: '1234567',
+      repetirPassword: '1234567',
+      fotoPath: 'tests/assets/foto-ejemplo.png',
+    });
+
+    await registerPage.clickCrearCuenta();
+    await registerPage.esperarModalConTextoEsperado('Debes ingresar un mail con formato válido');
   });
 
   test('Error cuando el email ya está registrado', async ({ page }) => {
-  allure.label('owner', 'Emir Segovia');
-  allure.severity('critical');
-  allure.feature('Register');
-  allure.story('Validaciones en registro de cuenta');
+    allure.label('owner', 'Emir Segovia');
+    allure.severity('critical');
+    allure.feature('Register');
+    allure.story('Validaciones en registro de cuenta');
 
-  const registerPage = new RegisterPage(page);
-  await registerPage.navigate();
+    const registerPage = new RegisterPage(page);
+    await registerPage.navigate();
 
-  await registerPage.completarFormulario({
-    nombre: 'Emir',
-    apellido: 'Valles',
-    dni: '30111222',
-    genero: 'Hombre',
-    fechaNacimiento: '1985-03-12',
-    email: 'emirvalles90@gmail.com', // Email ya registrado
-    password: '1234567',
-    repetirPassword: '1234567',
-    fotoPath: 'tests/assets/foto-ejemplo.png',
+    await registerPage.completarFormulario({
+      nombre: 'Emir',
+      apellido: 'Valles',
+      dni: '30111222',
+      genero: 'Hombre',
+      fechaNacimiento: '1985-03-12',
+      email: 'emirvalles90@gmail.com', // Email ya registrado
+      password: '1234567',
+      repetirPassword: '1234567',
+      fotoPath: 'tests/assets/foto-ejemplo.png',
+    });
+
+    await registerPage.clickCrearCuenta();
+    await registerPage.esperarModalConTextoEsperado("El email 'emirvalles90@gmail.com' ya está registrado.");
   });
-
-  await registerPage.clickCrearCuenta();
-
-  // Verifica el modal de error
-  const modalError = page.locator('.dialog-inner', { hasText: "El email 'emirvalles90@gmail.com' ya está registrado." });
-  await expect(modalError).toBeVisible({ timeout: 10000 });
-});
 });
