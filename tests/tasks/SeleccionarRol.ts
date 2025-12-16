@@ -7,14 +7,16 @@ import { Vendedor } from '../actors/Vendedor';
  */
 export async function seleccionarRolGeneral(actor: Encargado | Vendedor) {
   let link;
+  await actor.page.waitForURL('**/#!/selectrole/**', { timeout: 20000 });
+  await actor.page.getByRole('heading', { name: /Selecciona tu rol/i }).waitFor({ state: 'visible', timeout: 20000 });
   if (actor instanceof Encargado) {
-    link = actor.page.getByRole('link', { name: 'Encargado TEST [SOLO EMIR]' });
-    await link.click();
-    await actor.page.waitForURL('https://doorsticketsdev.com/#!/manager/71/');
+    link = actor.page.getByRole('link', { name: /Encargado\s+TEST \[SOLO EMIR\]/i });
+    await link.click({ timeout: 20000 });
+    await actor.page.waitForURL('**/#!/manager/71/**', { timeout: 20000 });
   } else if (actor instanceof Vendedor) {
-    link = actor.page.getByRole('link', { name: 'Vendedor TEST [SOLO EMIR]' });
-    await link.click();
-    await actor.page.waitForURL('https://doorsticketsdev.com/#!/vendedor/71/');
+    link = actor.page.getByRole('link', { name: /Vendedor\s+TEST \[SOLO EMIR\]/i });
+    await link.click({ timeout: 20000 });
+    await actor.page.waitForURL('**/#!/vendedor/71/**', { timeout: 20000 });
   } else {
     throw new Error('Tipo de actor no soportado');
   }

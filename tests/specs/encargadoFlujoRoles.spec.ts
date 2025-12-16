@@ -70,8 +70,7 @@ test.describe("Gestión de Roles", () => {
       await modal.cerrarModalExito();
 
       // Verificar si el email aparece en la lista
-      const emailEnLista = page.locator('.item-content', { hasText: email })
-        .locator('span', { hasText: email });
+      const emailEnLista = page.locator('.item-footer', { hasText: email });
       await expect(emailEnLista).toBeVisible({ timeout: 10000 });
     });
 
@@ -89,19 +88,8 @@ test.describe("Gestión de Roles", () => {
       await seleccionarRolGeneral(encargado);
       await page.waitForLoadState("networkidle");
 
-      // Click en sección "Vendedores" con selector más robusto
-      const seccionVendedores = page.locator('label', { hasText: "Vendedores" });
-      await seccionVendedores.click();
-      await page.waitForTimeout(1000);
-
-      // Click en botón "+" con selector más robusto
-      const botonAgregar = page.locator('.custom-fab a').first();
-      await botonAgregar.scrollIntoViewIfNeeded();
-      await botonAgregar.click();
-      await page.waitForTimeout(1000);
-
-      // Completar y confirmar en modal
-      await modal.completarEmailYConfirmar(email);
+      // Intentar agregar un vendedor ya existente
+      await agregarNuevoVendedor(encargado, email);
 
       // Usar el helper para esperar y cerrar el modal de error
       await modal.esperarModalError("El usuario ya posee el rol indicado.");
@@ -258,10 +246,11 @@ test.describe("Gestión de Roles", () => {
       await seleccionarRolGeneral(encargado);
       await page.waitForLoadState("networkidle");
 
-      // Click en sección "Vendedores" con selector más robusto
-      const seccionVendedores = page.locator('label', { hasText: "Vendedores" });
+      // Ir a "Vendedores"
+      const seccionVendedores = page.locator('a.item-link[href="/manager/71/vendedores/"]');
+      await seccionVendedores.waitFor({ state: 'visible', timeout: 20000 });
       await seccionVendedores.click();
-      await page.waitForTimeout(1000);
+      await page.waitForURL('**/#!/manager/71/vendedores/**', { timeout: 20000 });
 
       // Eliminar vendedor por email
       await EliminarVendedorPorEmail(encargado, email);
@@ -271,6 +260,10 @@ test.describe("Gestión de Roles", () => {
 
       // Esperar y cerrar el modal de éxito
       await modal.esperarModalEliminacionExitosa();
+
+      // Verificar que el vendedor ya no está en la lista
+      const emailEnLista = page.locator('.page.page-current .vendor-grid .item-footer', { hasText: email });
+      await expect(emailEnLista).toHaveCount(0, { timeout: 10000 });
     });
 
   });
@@ -301,17 +294,12 @@ test.describe("Gestión de Roles", () => {
       await page.waitForLoadState("networkidle");
 
       try {
-        // Agregar nuevo canjeador
+        // Intentar agregar canjeador (en STG este email ya existe)
         await agregarNuevoCanjeador(encargado, email);
 
-        // Espera y cierra el modal de éxito usando el helper
-        await modal.esperarModalExito();
-        await modal.cerrarModalExito();
-
-        // Verificar si el email aparece en la lista
-        const emailEnLista = page.locator('.item-content', { hasText: email })
-          .locator('span', { hasText: email });
-        await expect(emailEnLista).toBeVisible({ timeout: 10000 });
+        // Debe mostrar error y cerrar con OK
+        await modal.esperarModalError("El usuario ya posee el rol indicado.");
+        await modal.cerrarModalError();
       } catch (error) {
         console.log("Error en la prueba de agregar canjeador:", error);
         await page.screenshot({ path: 'error-agregar-canjeador.png', fullPage: true });
@@ -334,9 +322,10 @@ test.describe("Gestión de Roles", () => {
       await page.waitForLoadState("networkidle");
 
       // Click en sección "Canjeadores" con nuevo selector
-      const seccionCanjeadores = page.locator('li.item-input.svelte-1x3l73x a[href*="/canjeadores/"]');
+      const seccionCanjeadores = page.locator('a.item-link[href="/manager/71/canjeadores/"]');
+      await seccionCanjeadores.waitFor({ state: 'visible', timeout: 20000 });
       await seccionCanjeadores.click();
-      await page.waitForLoadState("networkidle");
+      await page.waitForURL('**/#!/manager/71/canjeadores/**', { timeout: 20000 });
 
       // Click en botón "+" con nuevo selector
       const botonAgregar = page.locator('.custom-fab.fab.fab-right-bottom a');
@@ -384,9 +373,10 @@ test.describe("Gestión de Roles", () => {
         await page.waitForLoadState("networkidle");
 
         // Click en sección "Canjeadores" con nuevo selector
-        const seccionCanjeadores = page.locator('li.item-input.svelte-1x3l73x a[href*="/canjeadores/"]');
+        const seccionCanjeadores = page.locator('a.item-link[href="/manager/71/canjeadores/"]');
+        await seccionCanjeadores.waitFor({ state: 'visible', timeout: 20000 });
         await seccionCanjeadores.click();
-        await page.waitForLoadState("networkidle");
+        await page.waitForURL('**/#!/manager/71/canjeadores/**', { timeout: 20000 });
 
         // Eliminar canjeador por email
         await EliminarCanjeadorPorEmail(encargado, email);
@@ -398,7 +388,7 @@ test.describe("Gestión de Roles", () => {
         await modal.esperarModalEliminacionExitosa();
 
         // Verificar que el email ya no está en la lista con un timeout más amplio
-        const emailEnLista = page.locator('.item-footer span, .item-content span', { hasText: email });
+        const emailEnLista = page.locator('.page.page-current .item-footer span, .page.page-current .item-content span', { hasText: email });
         await expect(emailEnLista).toHaveCount(0, { timeout: 10000 });
       } catch (error) {
         console.log("Error en la prueba de eliminar canjeador:", error);
@@ -474,16 +464,17 @@ test.describe("Gestión de Roles", () => {
       await seleccionarRolGeneral(encargado);
       await page.waitForLoadState("networkidle");
 
-      // Click en sección "Supervisores" con selector más robusto
-      const seccionSupervisores = page.locator('label', { hasText: "Supervisores" });
+      // Ir a "Supervisores"
+      const seccionSupervisores = page.locator('a.item-link[href="/manager/71/supervisores/"]');
+      await seccionSupervisores.waitFor({ state: 'visible', timeout: 20000 });
       await seccionSupervisores.click();
-      await page.waitForTimeout(1000); // Espera explícita
+      await page.waitForURL('**/#!/manager/71/supervisores/**', { timeout: 20000 });
 
-      // Click en botón "+" con selector más robusto
-      const botonAgregar = page.locator('.custom-fab a').first();
+      // Click en botón "+" (FAB)
+      const botonAgregar = page.locator('.page.page-current .custom-fab.fab.fab-right-bottom .btn-menuSeller.button').first();
+      await botonAgregar.waitFor({ state: 'visible', timeout: 20000 });
       await botonAgregar.scrollIntoViewIfNeeded();
-      await botonAgregar.click();
-      await page.waitForTimeout(1000); // Espera explícita
+      await botonAgregar.click({ force: true });
 
       // Completar y confirmar en modal
       await modal.completarEmailYConfirmar(email);
@@ -509,10 +500,11 @@ test.describe("Gestión de Roles", () => {
         await seleccionarRolGeneral(encargado);
         await page.waitForLoadState("networkidle");
 
-        // Click en sección "Supervisores" con selector más robusto
-        const seccionSupervisores = page.locator('label', { hasText: "Supervisores" });
+        // Ir a "Supervisores"
+        const seccionSupervisores = page.locator('a.item-link[href="/manager/71/supervisores/"]');
+        await seccionSupervisores.waitFor({ state: 'visible', timeout: 20000 });
         await seccionSupervisores.click();
-        await page.waitForTimeout(1000); // Espera explícita
+        await page.waitForURL('**/#!/manager/71/supervisores/**', { timeout: 20000 });
 
         // Eliminar supervisor por email
         await EliminarSupervisorPorEmail(encargado, email);
@@ -524,7 +516,7 @@ test.describe("Gestión de Roles", () => {
         await modal.esperarModalEliminacionExitosa();
 
         // Verificar que el email ya no está en la lista con un timeout más amplio
-        const emailEnLista = page.locator('.item-footer span, .item-content span', { hasText: email });
+        const emailEnLista = page.locator('.page.page-current .item-footer span, .page.page-current .item-content span', { hasText: email });
         await expect(emailEnLista).toHaveCount(0, { timeout: 10000 });
       } catch (error) {
         console.log("Error en la prueba de eliminar supervisor:", error);

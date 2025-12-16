@@ -5,15 +5,14 @@ export async function editarTipoEscaneoCanjeador(encargado: Encargado, email: st
   const { page } = encargado;
 
   // Click en sección "Canjeadores"
-  const seccionCanjeadores = page.locator('li.item-input.svelte-1x3l73x a[href*="/canjeadores/"]');
+  const seccionCanjeadores = page.locator('a.item-link[href="/manager/71/canjeadores/"]');
+  await seccionCanjeadores.waitFor({ state: 'visible', timeout: 20000 });
   await seccionCanjeadores.click();
-
-  // Esperar que la página cargue
-  await page.waitForLoadState("networkidle");
+  await page.waitForURL('**/#!/manager/71/canjeadores/**', { timeout: 20000 });
 
   // Buscar el canjeador por email en la estructura específica
-  const canjeadorRow = page.locator('.grid-container.divisor-item.svelte-6fg2y1').filter({
-    has: page.locator('.item-footer span', { hasText: email })
+  const canjeadorRow = page.locator('.grid-container.divisor-item').filter({
+    has: page.locator('.item-footer', { hasText: email })
   });
   
   await canjeadorRow.waitFor({ state: 'visible', timeout: 10000 });

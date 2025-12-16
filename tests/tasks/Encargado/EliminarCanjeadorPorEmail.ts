@@ -3,24 +3,20 @@ import { Encargado } from '../../actors/Encargado';
 export async function EliminarCanjeadorPorEmail(encargado: Encargado, email: string) {
   const { page } = encargado;
 
-  // Encuentra el <li> que contiene el email
-  const liCanjeador = page.locator('li.swipeout', { hasText: email });
-  await liCanjeador.waitFor({ state: 'visible', timeout: 5000 });
+  // Layout actual: filas tipo grid con footer que contiene el email.
+  const canjeadorRow = page.locator('.grid-container.divisor-item').filter({
+    has: page.locator('.item-footer', { hasText: email })
+  }).first();
 
-  // Encuentra el índice de ese <li> en la lista
-  const allLis = page.locator('li.swipeout');
-  const count = await allLis.count();
-  let index = -1;
-  for (let i = 0; i < count; i++) {
-    const text = await allLis.nth(i).innerText();
-    if (text.includes(email)) {
-      index = i;
-      break;
-    }
+  await canjeadorRow.waitFor({ state: 'visible', timeout: 20000 });
+
+  // Trigger de eliminación (prioriza overlay clickeable; fallback al icono)
+  const overlayEliminar = canjeadorRow.locator('.action-trigger:has(i.fa-trash) a.button, .action-trigger:has(i.fa-light.fa-trash) a.button').first();
+  if (await overlayEliminar.count()) {
+    await overlayEliminar.click();
+    return;
   }
-  if (index === -1) throw new Error('No se encontró el canjeador con el email: ' + email);
 
-  // En la columna de acciones, busca el botón de eliminar en la misma posición
-  const botonEliminar = page.locator('i.fa-light.fa-trash').nth(index).locator('div > a.button');
-  await botonEliminar.click();
+  const iconoEliminar = canjeadorRow.locator('i.fa-trash, i.fa-light.fa-trash').first();
+  await iconoEliminar.click();
 }

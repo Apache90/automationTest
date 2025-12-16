@@ -3,24 +3,16 @@ import { Encargado } from '../../actors/Encargado';
 export async function EliminarVendedorPorEmail(encargado: Encargado, email: string) {
   const { page } = encargado;
 
-  // Encuentra el <li> que contiene el email
-  const liVendedor = page.locator('li.swipeout', { hasText: email });
-  await liVendedor.waitFor({ state: 'visible', timeout: 5000 });
+  // Ubica el vendedor por el email en el footer y sube al <li> contenedor
+  const emailFooter = page.locator('.item-footer', { hasText: email }).first();
+  await emailFooter.waitFor({ state: 'visible', timeout: 20000 });
 
-  // Encuentra el índice de ese <li> en la lista
-  const allLis = page.locator('li.swipeout');
-  const count = await allLis.count();
-  let index = -1;
-  for (let i = 0; i < count; i++) {
-    const text = await allLis.nth(i).innerText();
-    if (text.includes(email)) {
-      index = i;
-      break;
-    }
-  }
-  if (index === -1) throw new Error('No se encontró el vendedor con el email: ' + email);
+  // El layout nuevo es un grid de tarjetas; las acciones (incl. borrar) están fuera del <li>
+  // dentro de un contenedor `.vendor-actions`, pero siempre dentro de `.vendor-card`.
+  const vendorCard = emailFooter.locator('xpath=ancestor::*[contains(@class,"vendor-card")][1]');
+  await vendorCard.waitFor({ state: 'visible', timeout: 20000 });
 
-  // En la columna de acciones, busca el botón de eliminar en la misma posición
-  const botonEliminar = page.locator('.col-30 .fa-trash').nth(index).locator('a.button');
+  const botonEliminar = vendorCard.locator('.action-trigger:has(i.fa-trash) a.button').first();
+  await botonEliminar.waitFor({ state: 'visible', timeout: 20000 });
   await botonEliminar.click();
 }

@@ -3,24 +3,19 @@ import { Encargado } from '../../actors/Encargado';
 export async function EliminarSupervisorPorEmail(encargado: Encargado, email: string) {
   const { page } = encargado;
 
-  // Encuentra el <li> que contiene el email
-  const liVendedor = page.locator('li.swipeout', { hasText: email });
-  await liVendedor.waitFor({ state: 'visible', timeout: 5000 });
+  const emailNode = page.getByText(email, { exact: true }).first();
+  await emailNode.waitFor({ state: 'visible', timeout: 20000 });
 
-  // Encuentra el índice de ese <li> en la lista
-  const allLis = page.locator('li.swipeout');
-  const count = await allLis.count();
-  let index = -1;
-  for (let i = 0; i < count; i++) {
-    const text = await allLis.nth(i).innerText();
-    if (text.includes(email)) {
-      index = i;
-      break;
-    }
-  }
-  if (index === -1) throw new Error('No se encontró el supervisor con el email: ' + email);
+  // Layout esperado (según DOM provisto): todo el row vive en un `div.grid-container ...`
+  const supervisorRow = emailNode.locator('xpath=ancestor::div[contains(@class,"grid-container")][1]');
+  await supervisorRow.waitFor({ state: 'visible', timeout: 20000 });
 
-  // En la columna de acciones, busca el botón de eliminar en la misma posición
-  const botonEliminar = page.locator('i.fa-light.fa-trash').nth(index).locator('div > a.button');
-  await botonEliminar.click();
+  // Botón eliminar: <i class="fa-light fa-trash"> ... <a class="button" href="#"> ...
+  const botonEliminar = supervisorRow
+    .locator('i.fa-trash a.button, i.fa-light.fa-trash a.button, i.fa-trash a[href="#"], i.fa-light.fa-trash a[href="#"]')
+    .first();
+
+  await botonEliminar.waitFor({ state: 'visible', timeout: 20000 });
+  await botonEliminar.scrollIntoViewIfNeeded();
+  await botonEliminar.click({ force: true });
 }
