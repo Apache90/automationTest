@@ -14,9 +14,19 @@ const os = require('os');
 const TEMP_REPORT_DIR = path.join(os.homedir(), 'temp-allure');
 const CURRENT_DATE = new Date().toISOString().split('T')[0];
 
+function q(value) {
+  return `"${String(value).replace(/"/g, '\\"')}"`;
+}
+
+function uniqueId(prefix) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
 class ReportPublisher {
   
   async publishReport() {
+    const initialBranch = await this.getCurrentBranchOptional();
+
     try {
       console.log('📊 Iniciando generación y publicación de reportes...\n');
       
@@ -35,7 +45,11 @@ class ReportPublisher {
     } catch (error) {
       console.error('\n❌ Error en la publicación:', error.message);
       await this.cleanup();
-      process.exit(1);
+      // No usar process.exit() aquí: impediría ejecutar el finally y volver a main.
+      process.exitCode = 1;
+    } finally {
+      // Intentar siempre volver a main. Si falla (locks en Windows / worktree), no romper el script.
+      await this.execCommandOptional('git checkout main');
     }
   }
 
@@ -76,25 +90,13 @@ class ReportPublisher {
 
   async publishToGitHubPages() {
     console.log('\n🌐 Publicando a GitHub Pages...');
-    
+
     // Preparar directorio temporal
     await this.prepareReportCopy();
-    
-    // Cambiar a gh-pages
-    await this.switchToGhPages();
-    
-    // Limpiar y copiar reporte
-    await this.updateGhPagesContent();
-    
-    // Commit y push
-    await this.commitAndPush();
-    
-    // Volver a main
-    await this.execCommand('git checkout main');
-    
-    // Verificar y restaurar dependencias
-    await this.ensureNodeModules();
-    
+
+    // Publicar sin cambiar de rama (evita locks en Windows)
+    await this.publishWithWorktree();
+
     // Limpiar temporal
     await this.cleanup();
   }
@@ -114,108 +116,92 @@ class ReportPublisher {
     console.log(`✅ Reporte copiado a temporal`);
   }
 
-  async switchToGhPages() {
-    console.log('🔄 Cambiando a rama gh-pages...');
-    
+  async publishWithWorktree() {
+    const worktreeDir = path.join(os.tmpdir(), uniqueId('gh-pages-worktree'));
+    const publishBranch = uniqueId('__publish-gh-pages');
+
+    console.log('🧩 Publicando usando git worktree (sin checkout)...');
+
+    // Traer referencia remota si existe. Si no existe, el push creará gh-pages.
+    await this.execCommandOptional('git fetch origin gh-pages');
+
+    const hasRemote = await this.hasRemoteBranch('origin/gh-pages');
+    const startPoint = hasRemote ? 'origin/gh-pages' : 'HEAD';
+
+    // Crear/actualizar rama temporal en el commit base
+    await this.execCommand(`git branch -f ${publishBranch} ${startPoint}`);
+
+    // Crear worktree
+    await this.execCommand(`git worktree add -f ${q(worktreeDir)} ${publishBranch}`);
+
     try {
-      // Intentar cambiar a gh-pages existente
-      await this.execCommand('git checkout gh-pages');
-      console.log('✅ Cambiado a rama gh-pages existente');
-    } catch (error) {
-      try {
-        // Si falla, intentar crear la rama
-        console.log('📝 Creando nueva rama gh-pages...');
-        await this.execCommand('git checkout -b gh-pages');
-        
-        // Crear .nojekyll para GitHub Pages
-        fs.writeFileSync('.nojekyll', '');
-        await this.execCommand('git add .nojekyll');
-        await this.execCommand('git commit -m "Initial gh-pages setup"');
-        await this.execCommand('git push origin gh-pages');
-        console.log('✅ Rama gh-pages creada y configurada');
-      } catch (createError) {
-        // Si también falla crear, intentar forzar el checkout
-        console.log('🔄 Intentando forzar checkout a gh-pages...');
-        await this.execCommand('git checkout gh-pages --force');
-        console.log('✅ Forzado checkout a gh-pages');
-      }
+      await this.updateGhPagesContentAt(worktreeDir);
+      await this.commitAndPushFrom(worktreeDir, { hasRemote });
+    } finally {
+      // Siempre limpiar worktree y rama temporal
+      await this.execCommandOptional(`git worktree remove -f ${q(worktreeDir)}`);
+      await this.execCommandOptional(`git branch -D ${publishBranch}`);
     }
   }
 
-  async updateGhPagesContent() {
-    console.log('🧹 Actualizando contenido de gh-pages...');
-    
-    // SEGURIDAD: Verificar que estamos en gh-pages
-    const currentBranch = await this.getCurrentBranch();
-    if (currentBranch !== 'gh-pages') {
-      throw new Error(`❌ PELIGRO: Intentando limpiar en rama ${currentBranch}. Solo se permite en gh-pages`);
-    }
-    
-    // Crear .nojekyll si no existe
-    if (!fs.existsSync('.nojekyll')) {
-      fs.writeFileSync('.nojekyll', '');
+  async updateGhPagesContentAt(targetDir) {
+    console.log('🧹 Actualizando contenido de gh-pages (worktree)...');
+
+    // Archivos esenciales que NO se borran
+    const filesToKeep = ['.git', '.nojekyll', 'index.md'];
+
+    // Crear .nojekyll
+    const noJekyllPath = path.join(targetDir, '.nojekyll');
+    if (!fs.existsSync(noJekyllPath)) {
+      fs.writeFileSync(noJekyllPath, '');
       console.log('📄 Archivo .nojekyll creado');
     }
-    
-    // Crear index.md si no existe
-    if (!fs.existsSync('index.md')) {
-      const indexContent = `# Automation Test Reports
 
-Este sitio contiene los reportes de automatización.
-
-[Ver Reporte Allure](./index.html)
-
-*Última actualización: ${CURRENT_DATE}*`;
-      
-      fs.writeFileSync('index.md', indexContent);
+    // Crear index.md
+    const indexMdPath = path.join(targetDir, 'index.md');
+    if (!fs.existsSync(indexMdPath)) {
+      const indexContent = `# Automation Test Reports\n\nEste sitio contiene los reportes de automatización.\n\n[Ver Reporte Allure](./index.html)\n\n*Última actualización: ${CURRENT_DATE}*`;
+      fs.writeFileSync(indexMdPath, indexContent);
       console.log('📄 Archivo index.md creado');
     }
-    
-    // LIMPIEZA SELECTIVA: Solo borrar archivos específicos de reportes anteriores
-    const reportFilesToRemove = [
-      'app.js', 'favicon.ico', 'history', 'plugins', 'styles.css',
-      'export', 'data', 'widgets'
-    ];
-    
-    for (const file of reportFilesToRemove) {
-      if (fs.existsSync(file)) {
-        fs.rmSync(file, { recursive: true, force: true });
-        console.log(`🗑️  Eliminado: ${file}`);
+
+    // Limpieza total (salvo esenciales)
+    const items = fs.readdirSync(targetDir);
+    for (const item of items) {
+      if (!filesToKeep.includes(item)) {
+        fs.rmSync(path.join(targetDir, item), { recursive: true, force: true });
       }
     }
-    
-    // También limpiar archivos .html antiguos (excepto index.md)
-    const htmlFiles = fs.readdirSync('.').filter(f => 
-      f.endsWith('.html') && f !== 'index.html'
-    );
-    
-    for (const htmlFile of htmlFiles) {
-      fs.rmSync(htmlFile, { force: true });
-      console.log(`🗑️  Eliminado HTML anterior: ${htmlFile}`);
-    }
-    
+
     // Copiar nuevo reporte
-    await this.copyDirectory(TEMP_REPORT_DIR, '.');
-    
-    console.log('✅ Contenido actualizado de forma segura');
+    await this.copyDirectory(TEMP_REPORT_DIR, targetDir);
+
+    console.log('✅ Contenido actualizado');
   }
 
-  async commitAndPush() {
+  async commitAndPushFrom(worktreeDir, { hasRemote }) {
     console.log('📤 Subiendo cambios a GitHub...');
-    
-    await this.execCommand('git add .');
-    
+
+    await this.execCommandIn(worktreeDir, 'git add -A');
+
     try {
-      await this.execCommand(`git commit -m "Actualizar reportes Allure - ${CURRENT_DATE}"`);
-      await this.execCommand('git push origin gh-pages');
-      console.log('✅ Cambios subidos a GitHub Pages');
+      await this.execCommandIn(worktreeDir, `git commit -m "Actualizar reportes Allure - ${CURRENT_DATE}"`);
     } catch (error) {
       if (error.message.includes('nothing to commit')) {
         console.log('ℹ️  No hay cambios en el reporte para subir');
-      } else {
-        throw error;
+        return;
       }
+      throw error;
     }
+
+    // Empujar el HEAD del worktree hacia la rama gh-pages remota.
+    // Esto evita non-fast-forward siempre que partamos de origin/gh-pages.
+    const pushCmd = hasRemote
+      ? 'git push origin HEAD:gh-pages'
+      : 'git push -u origin HEAD:gh-pages';
+
+    await this.execCommandIn(worktreeDir, pushCmd);
+    console.log('✅ Cambios subidos a GitHub Pages');
   }
 
   async cleanup() {
@@ -262,16 +248,6 @@ Este sitio contiene los reportes de automatización.
     });
   }
 
-  async getCurrentBranch() {
-    try {
-      const result = await this.execCommand('git branch --show-current');
-      return result.trim();
-    } catch (error) {
-      console.error('Error obteniendo rama actual:', error.message);
-      return 'unknown';
-    }
-  }
-
   async ensureNodeModules() {
     console.log('🔍 Verificando dependencias...');
     
@@ -282,6 +258,45 @@ Este sitio contiene los reportes de automatización.
     } else {
       console.log('✅ Dependencias ya disponibles');
     }
+  }
+
+  async getCurrentBranchOptional() {
+    try {
+      const result = await this.execCommand('git branch --show-current');
+      return result.trim() || null;
+    } catch {
+      return null;
+    }
+  }
+
+  async hasRemoteBranch(remoteRef) {
+    try {
+      await this.execCommand(`git rev-parse --verify ${remoteRef}`);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async execCommandOptional(command) {
+    try {
+      return await this.execCommand(command);
+    } catch {
+      return null;
+    }
+  }
+
+  execCommandIn(cwd, command) {
+    return new Promise((resolve, reject) => {
+      exec(command, { cwd }, (error, stdout, stderr) => {
+        if (error) {
+          reject(new Error(`${error.message}\n${stderr}`));
+        } else {
+          if (stdout) console.log(stdout.trim());
+          resolve(stdout);
+        }
+      });
+    });
   }
 }
 
