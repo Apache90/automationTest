@@ -1,2 +1,0 @@
-Esperando modal de error con mensaje: "Debe seleccionar algun día para que la limitación funcione"
-Modal de error encontrado correctamente

@@ -1,4 +1,0 @@
-Error en test "Error cuando no se ingresa el nombre del cupón de tipo DNI": page.goto: Target page, context or browser has been closed
-Call log:
-  - navigating to "https://doorsticketsdev.com/#!/login/", waiting until "load"
-

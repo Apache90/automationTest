@@ -1,0 +1,6 @@
+✓ Paso 2 activo
+✓ Formulario paso 2 renderizado
+✓ Email ingresado
+✓ Contraseña ingresada
+✓ Repetir contraseña ingresada
+✓ Clic en Crear Mi Cuenta
