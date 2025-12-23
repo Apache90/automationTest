@@ -8,8 +8,8 @@ export async function eliminarCuponDeGrupoQr(
 ) {
   const { page } = encargado;
 
-  // Navegar directamente a la sección QR
-  await page.locator('a[href="/manager/71/cuponesqr/QR"]').click();
+  // Navegar directamente a la sección QR (sin hardcodear el id del manager)
+  await page.locator('a[href$="/cuponesqr/QR"]').click();
   await expect(page).toHaveURL(/cuponesqr\/QR/);
   await page.waitForLoadState("networkidle");
   await page.waitForTimeout(500);
@@ -26,24 +26,20 @@ export async function eliminarCuponDeGrupoQr(
   await page.locator('.fa-light.fa-trash > div > .button').first().click();
   await page.waitForTimeout(500);
 
-  // Verificar que aparece el modal de confirmación
-  const modalConfirmacion = page.locator('.dialog.custom-dialog-background');
-  await expect(modalConfirmacion).toBeVisible();
-  
-  // Verificar el texto del modal
-  await expect(page.locator('.btnCustomDialogSubtitle')).toHaveText('¿Esta seguro que quiere eliminar este cupón del grupo?');
+  // Confirmar eliminación en el modal (scopado para evitar ambigüedad)
+  const modalConfirmacion = page.locator('.dialog.dialog-buttons-1.custom-dialog-background.modal-in');
+  await expect(modalConfirmacion).toBeVisible({ timeout: 10000 });
+  await expect(modalConfirmacion.locator('.btnCustomDialogSubtitle')).toContainText('eliminar este cupón del grupo', { timeout: 10000 });
+  await modalConfirmacion.locator('span.dialog-button', { hasText: 'Confirmar' }).click();
+  await expect(modalConfirmacion).toBeHidden({ timeout: 10000 });
 
-  // Confirmar eliminación en el modal
-  await page.getByText('Confirmar').click();
-  await page.waitForTimeout(500);
-
-  // Verificar modal de éxito
-  const modalExito = page.locator('.dialog.modal-in');
-  await expect(modalExito).toBeVisible();
-  await expect(page.locator('.dialog-text')).toHaveText('Cupón eliminado del grupo con éxito');
-
-  // Cerrar el modal de éxito
-  await page.getByText('OK').click();
+  // Verificar modal de éxito y cerrarlo (scopado por el texto esperado)
+  const modalExito = page.locator('.dialog.dialog-buttons-1.modal-in', {
+    has: page.locator('.dialog-text', { hasText: 'Cupón eliminado del grupo con éxito' }),
+  });
+  await expect(modalExito).toBeVisible({ timeout: 10000 });
+  await modalExito.locator('span.dialog-button', { hasText: 'OK' }).click();
+  await expect(modalExito).toBeHidden({ timeout: 10000 });
   await page.waitForTimeout(500);
 }
 
@@ -54,8 +50,8 @@ export async function eliminarCuponDeGrupoQrPago(
 ) {
   const { page } = encargado;
 
-  // Navegar directamente a la sección QR Pago
-  await page.locator('a[href="/manager/71/cuponesqr/Pago_QR"]').click();
+  // Navegar directamente a la sección QR Pago (sin hardcodear el id del manager)
+  await page.locator('a[href$="/cuponesqr/Pago_QR"]').click();
   await expect(page).toHaveURL(/cuponesqr\/Pago_QR/);
   await page.waitForLoadState("networkidle");
   await page.waitForTimeout(500);
@@ -72,23 +68,19 @@ export async function eliminarCuponDeGrupoQrPago(
   await page.locator('.fa-light.fa-trash > div > .button').first().click();
   await page.waitForTimeout(500);
 
-  // Verificar que aparece el modal de confirmación
-  const modalConfirmacion = page.locator('.dialog.custom-dialog-background');
-  await expect(modalConfirmacion).toBeVisible();
-  
-  // Verificar el texto del modal
-  await expect(page.locator('.btnCustomDialogSubtitle')).toHaveText('¿Esta seguro que quiere eliminar este cupón del grupo?');
+  // Confirmar eliminación en el modal (scopado para evitar ambigüedad)
+  const modalConfirmacion = page.locator('.dialog.dialog-buttons-1.custom-dialog-background.modal-in');
+  await expect(modalConfirmacion).toBeVisible({ timeout: 10000 });
+  await expect(modalConfirmacion.locator('.btnCustomDialogSubtitle')).toContainText('eliminar este cupón del grupo', { timeout: 10000 });
+  await modalConfirmacion.locator('span.dialog-button', { hasText: 'Confirmar' }).click();
+  await expect(modalConfirmacion).toBeHidden({ timeout: 10000 });
 
-  // Confirmar eliminación en el modal
-  await page.getByText('Confirmar').click();
-  await page.waitForTimeout(500);
-
-  // Verificar modal de éxito
-  const modalExito = page.locator('.dialog.modal-in');
-  await expect(modalExito).toBeVisible();
-  await expect(page.locator('.dialog-text')).toHaveText('Cupón eliminado del grupo con éxito');
-
-  // Cerrar el modal de éxito
-  await page.getByText('OK').click();
+  // Verificar modal de éxito y cerrarlo
+  const modalExito = page.locator('.dialog.dialog-buttons-1.modal-in', {
+    has: page.locator('.dialog-text', { hasText: 'Cupón eliminado del grupo con éxito' }),
+  });
+  await expect(modalExito).toBeVisible({ timeout: 10000 });
+  await modalExito.locator('span.dialog-button', { hasText: 'OK' }).click();
+  await expect(modalExito).toBeHidden({ timeout: 10000 });
   await page.waitForTimeout(500);
 }

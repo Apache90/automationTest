@@ -20,4 +20,19 @@ export async function seleccionarRolGeneral(actor: Encargado | Vendedor) {
   } else {
     throw new Error('Tipo de actor no soportado');
   }
+
+  // Eruda (consola overlay) a veces se inyecta en entornos web y puede interceptar clicks.
+  // Lo deshabilitamos vía CSS para estabilizar la interacción.
+  await actor.page.addStyleTag({
+    content: `
+      #eruda, #eruda * {
+        pointer-events: none !important;
+      }
+      #eruda {
+        display: none !important;
+      }
+    `,
+  }).catch(() => {
+    // Ignorar si no se puede inyectar (por CSP u otros motivos)
+  });
 }

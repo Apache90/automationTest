@@ -9,24 +9,56 @@ export class LimitacionesPage {
 
   async navegarAVendedores() {
     // Navegar a la sección de vendedores
-    await this.page.locator('label', { hasText: "Vendedores" }).click();
-    await expect(this.page).toHaveURL(/vendedores/);
+    // (evitar hardcode de /manager/71; el id puede variar por usuario/entorno)
+    const linkVendedores = this.page
+      .locator('a.item-link[href$="/vendedores/"]')
+      .or(this.page.locator('a.item-link:has(.item-title:has-text("Vendedores"))'));
+
+    await expect(linkVendedores.first()).toBeVisible({ timeout: 20000 });
+    await linkVendedores.first().click();
+
+    await expect(this.page).toHaveURL(/\/#!\/manager\/(\d+)\/vendedores(\/|$)/, { timeout: 20000 });
     await this.page.waitForLoadState("networkidle");
   }
 
   async clickLimitacionesVendedor(emailVendedor: string) {
-    // Buscar el vendedor por email y hacer click en el ícono de limitaciones
-    const vendedorContainer = this.page.locator('.grid-container').filter({
-      has: this.page.locator('.item-footer span', { hasText: emailVendedor })
+    // Buscar el vendedor por email y hacer click en el ícono/link de limitaciones.
+    // La UI puede renderizar el email en distintos contenedores (no siempre .item-footer span).
+    await expect(this.page.getByRole('heading', { name: /Vendedores/i })).toBeVisible({ timeout: 20000 });
+    const emailText = this.page.getByText(emailVendedor, { exact: true });
+    await expect(emailText).toBeVisible({ timeout: 20000 });
+
+    // IMPORTANTE: NO usar contenedores grandes como .vendor-grid porque contienen
+    // varios emails y terminaríamos clickeando el primer link de limitaciones.
+    const cardVendedor = this.page.locator('.vendor-card', {
+      has: this.page.locator('.vendor-email', { hasText: emailVendedor }),
     });
-    
-    // Click en el icono de limitaciones (fa-ticket)
-    const botonLimitaciones = vendedorContainer.locator('a:has(i.fa-light.fa-ticket)');
-    await expect(botonLimitaciones).toBeVisible({ timeout: 5000 });
-    await botonLimitaciones.click();
-    
+
+    if (await cardVendedor.count()) {
+      const linkLimitaciones = cardVendedor
+        .first()
+        .locator('a[href*="/vendedores/"][href$="/limitaciones/"]')
+        .first();
+
+      await expect(linkLimitaciones).toBeVisible({ timeout: 20000 });
+      await linkLimitaciones.click();
+    } else {
+      // Fallback (layout viejo tipo lista): buscar el ancestro más cercano que contenga el link.
+      const contenedorVendedor = emailText.locator(
+        'xpath=ancestor::*[self::div or self::li][.//a[contains(@href,"/vendedores/") and contains(@href,"/limitaciones/")]][1]'
+      );
+
+      const linkLimitaciones = contenedorVendedor
+        .locator('a[href*="/vendedores/"][href$="/limitaciones/"]')
+        .first();
+
+      await expect(contenedorVendedor).toBeVisible({ timeout: 20000 });
+      await expect(linkLimitaciones).toBeVisible({ timeout: 20000 });
+      await linkLimitaciones.click();
+    }
+
     // Verificar que estamos en la página de limitaciones del vendedor
-    await expect(this.page).toHaveURL(/limitaciones/);
+    await expect(this.page).toHaveURL(/\/#!\/manager\/(\d+)\/vendedores\/[^/]+\/limitaciones(\/|$)/, { timeout: 20000 });
     await this.page.waitForLoadState("networkidle");
   }
 
@@ -335,33 +367,62 @@ export class LimitacionesPage {
     } else if (nombreLimitacion.includes("DNI")) {
       seccionTexto = "DNI'S";
     } else if (nombreLimitacion.includes("QR") && nombreLimitacion.includes("$")) {
-      seccionTexto = "QR'S $";
+      seccionTexto = "QR'S PAGO";
     } else if (nombreLimitacion.includes("QR")) {
       seccionTexto = "QR'S";
     }
 
-    // Desplegar la sección correspondiente
-    if (seccionTexto) {
-      const seccionElement = this.page.locator('.couponType').filter({ hasText: seccionTexto });
-      await expect(seccionElement).toBeVisible({ timeout: 5000 });
-      await seccionElement.click();
-      await this.page.waitForTimeout(1000);
+    const headingLimitaciones = this.page.getByRole('heading', { name: /Limitaciones/i });
+    await expect(headingLimitaciones).toBeVisible({ timeout: 20000 });
+
+    // Scopear al "page" correcto (en SPA conviven varias vistas en el DOM)
+    let scope = headingLimitaciones.locator('xpath=ancestor::*[contains(@class,"page")][1]');
+    if ((await scope.count()) === 0) {
+      scope = this.page.locator('.page').filter({ has: headingLimitaciones }).first();
     }
 
-    // Buscar la limitación específica por nombre
-    const limitacionContainer = this.page.locator('.grid-container.display-flex.align-items-center.justify-content-space-between')
-      .filter({ has: this.page.locator('.item-title', { hasText: nombreLimitacion }) });
-    
-    await expect(limitacionContainer).toBeVisible({ timeout: 5000 });
+    const textoLimitacion = scope.getByText(nombreLimitacion).first();
+    const textoVisibleAntes = (await textoLimitacion.count()) > 0 && await textoLimitacion.isVisible();
 
-    // Click en el botón de editar (lápiz)
-    const botonEditar = limitacionContainer.locator('a[href="#"]').filter({
-      has: this.page.locator('text=pencil')
-    });
-    
-    await expect(botonEditar).toBeVisible({ timeout: 5000 });
-    await botonEditar.click();
-    await this.page.waitForLoadState("networkidle");
+    // Desplegar la sección correspondiente solo si hace falta
+    if (seccionTexto && !textoVisibleAntes) {
+      const seccionCupon = scope
+        .locator('.couponType')
+        .filter({ has: scope.locator('.hdr-title', { hasText: seccionTexto }) })
+        .first()
+        .or(scope.locator('.couponType').filter({ hasText: seccionTexto }).first());
+
+      await expect(seccionCupon).toBeVisible({ timeout: 20000 });
+      await seccionCupon.click();
+      await this.page.waitForTimeout(500);
+    }
+
+    await expect(textoLimitacion).toBeVisible({ timeout: 20000 });
+
+    // Igual que con eliminar: priorizar .limit-row (ahí viven las acciones)
+    const limitacionRow = textoLimitacion.locator('xpath=ancestor::*[contains(@class,"limit-row")][1]');
+    const limitacionContainerFallback = textoLimitacion.locator(
+      'xpath=ancestor::*[self::li or contains(@class,"grid-container")][1]'
+    );
+    const limitacionContainer = (await limitacionRow.count()) > 0 ? limitacionRow : limitacionContainerFallback;
+
+    await expect(limitacionContainer).toBeVisible({ timeout: 20000 });
+    await limitacionContainer.scrollIntoViewIfNeeded();
+
+    // Botón editar (pencil): puede aparecer como texto "pencil" + link href="#".
+    const actionWrapPencil = limitacionContainer.locator('.action-wrap').filter({ hasText: 'pencil' }).first();
+    const linkPencil = actionWrapPencil.locator('a.button').first().or(actionWrapPencil.locator('a[href="#"]').first());
+
+    if ((await linkPencil.count()) > 0) {
+      await linkPencil.click({ force: true, timeout: 20000 });
+    } else {
+      // Fallback: link siguiente al texto "pencil" dentro de la fila
+      const linkPencilCercano = limitacionContainer.locator('xpath=.//*[normalize-space()="pencil"]/following::a[1]');
+      await expect(linkPencilCercano.first()).toBeAttached({ timeout: 20000 });
+      await linkPencilCercano.first().click({ force: true, timeout: 20000 });
+    }
+
+    await this.page.waitForLoadState('networkidle');
   }
 
   async clickEliminarLimitacion(nombreCupon: string) {
@@ -377,51 +438,93 @@ export class LimitacionesPage {
       seccionTexto = "QR'S";
     }
     
-    if (seccionTexto) {
-      // Hacer click en la sección correspondiente para desplegarla usando un selector más específico
-      const seccionCupon = this.page.locator(`.couponType.svelte-9yezak`).filter({ hasText: new RegExp(`^${seccionTexto}\\s+Cantidad\\s+Acciones`) });
-      await expect(seccionCupon).toBeVisible({ timeout: 5000 });
+    const headingLimitaciones = this.page.getByRole('heading', { name: /Limitaciones/i });
+    await expect(headingLimitaciones).toBeVisible({ timeout: 20000 });
+
+    // Tomar el contenedor de la página a partir del heading (no depender de page-current;
+    // a veces conviven varias páginas en DOM).
+    let scope = headingLimitaciones.locator('xpath=ancestor::*[contains(@class,"page")][1]');
+    if ((await scope.count()) === 0) {
+      scope = this.page.locator('.page').filter({ has: headingLimitaciones }).first();
+    }
+
+    const textoLimitacion = scope.getByText(nombreCupon).first();
+    const textoVisibleAntes = (await textoLimitacion.count()) > 0 && await textoLimitacion.isVisible();
+
+    // Si la sección está colapsada, el texto puede no estar visible. Solo toggleamos si hace falta.
+    if (seccionTexto && !textoVisibleAntes) {
+      // Expandir la sección correspondiente (sin depender de clases svelte)
+      const seccionCupon = scope
+        .locator('.couponType')
+        .filter({ has: scope.locator('.hdr-title', { hasText: seccionTexto }) })
+        .first()
+        .or(scope.locator('.couponType').filter({ hasText: seccionTexto }).first());
+
+      await expect(seccionCupon).toBeVisible({ timeout: 20000 });
       await seccionCupon.click();
-      
-      // Esperar un momento para que se despliegue
-      await this.page.waitForTimeout(1000);
+      await this.page.waitForTimeout(500);
     }
-    
-    // Buscar el componente que contiene la limitación específica
-    const limitacionContainer = this.page.locator('.grid-container').filter({
-      has: this.page.locator('.item-title', { hasText: nombreCupon })
-    });
-    
-    await expect(limitacionContainer).toBeVisible({ timeout: 5000 });
-    
-    // Buscar el botón de eliminar (icono trash) - usar un selector más simple basado en el HTML real
-    const botonEliminar = limitacionContainer.locator('.margin-horizontal i.f7-icons:has-text("trash")').locator('xpath=following-sibling::div//a');
-    
-    // Si no encuentra con el selector anterior, probar alternativas
-    if (!(await botonEliminar.isVisible())) {
-      // Alternativa 1: buscar directamente el enlace después del icono trash
-      const botonEliminarAlt1 = limitacionContainer.locator('i.f7-icons:has-text("trash") + div a');
-      if (await botonEliminarAlt1.isVisible()) {
-        await botonEliminarAlt1.click();
-        return;
+
+    await expect(textoLimitacion).toBeVisible({ timeout: 20000 });
+
+    // Contenedor de la limitación:
+    // IMPORTANTE: en el layout nuevo el texto vive dentro de un <li> (limit-main) pero
+    // las acciones (pencil/trash) viven fuera, dentro de .limit-row. Si nos quedamos en <li>
+    // nunca vamos a encontrar los botones. Por eso priorizamos .limit-row.
+    const limitacionRow = textoLimitacion.locator('xpath=ancestor::*[contains(@class,"limit-row")][1]');
+    const limitacionContainerFallback = textoLimitacion.locator(
+      'xpath=ancestor::*[self::li or contains(@class,"grid-container")][1]'
+    );
+    const limitacionContainer = (await limitacionRow.count()) > 0 ? limitacionRow : limitacionContainerFallback;
+
+    await expect(limitacionContainer).toBeVisible({ timeout: 20000 });
+    await limitacionContainer.scrollIntoViewIfNeeded();
+
+    const modalConfirmacion = this.page.locator('.dialog.dialog-buttons-1.custom-dialog-background.modal-in');
+    const modalSeAbrio = async () => (await modalConfirmacion.count()) > 0 && await modalConfirmacion.isVisible();
+    const intentarClickYVerificarModal = async (target: Locator) => {
+      if ((await target.count()) === 0) return false;
+      await target.first().click({ force: true, timeout: 20000 });
+      try {
+        await modalConfirmacion.waitFor({ state: 'visible', timeout: 2500 });
+        return true;
+      } catch {
+        return await modalSeAbrio();
       }
-      
-      // Alternativa 2: buscar cualquier enlace cerca del icono trash
-      const botonEliminarAlt2 = limitacionContainer.locator('.margin-horizontal:has(i.f7-icons:has-text("trash")) a');
-      if (await botonEliminarAlt2.isVisible()) {
-        await botonEliminarAlt2.click();
-        return;
-      }
-      
-      // Alternativa 3: hacer click directamente en el div que contiene el enlace invisible
-      const divConEnlace = limitacionContainer.locator('i.f7-icons:has-text("trash") + div');
-      if (await divConEnlace.isVisible()) {
-        await divConEnlace.click();
-        return;
-      }
-    } else {
-      await botonEliminar.click();
+    };
+
+    // Botón eliminar (trash): en algunos snapshots el árbol accesible muestra
+    // "text: trash" + un "link" (href="#") sin exponer el <i.f7-icons>.
+    // Por eso NO dependemos de i.f7-icons; buscamos el action-wrap que contiene el texto "trash".
+    const actionWrapTrash = limitacionContainer.locator('.action-wrap').filter({ hasText: 'trash' }).first();
+
+    // Estrategia 1: click en el overlay/link dentro del action-wrap (preferir a.button)
+    const linkTrash = actionWrapTrash.locator('a.button').first().or(actionWrapTrash.locator('a[href="#"]').first());
+    if (await intentarClickYVerificarModal(linkTrash)) return;
+
+    // Estrategia 2: click en el contenedor action-wrap
+    if (await intentarClickYVerificarModal(actionWrapTrash)) return;
+
+    // Estrategia 3: XPath cerca del texto "trash" dentro de la fila (link siguiente)
+    const linkTrashCercano = limitacionContainer.locator(
+      'xpath=.//*[normalize-space()="trash"]/following::a[1]'
+    );
+    if (await intentarClickYVerificarModal(linkTrashCercano)) return;
+
+    // Último recurso: dispatchEvent (bypass de actionability/overlays)
+    try {
+      await linkTrash.dispatchEvent('click');
+      if (await modalSeAbrio()) return;
+    } catch {
+      // no-op
     }
+    try {
+      await linkTrashCercano.dispatchEvent('click');
+      if (await modalSeAbrio()) return;
+    } catch {
+      // no-op
+    }
+    await actionWrapTrash.dispatchEvent('click');
   }
 
   async confirmarEliminacionLimitacion() {

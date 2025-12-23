@@ -11,32 +11,42 @@ export class CuponesDniPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.seccionDNIs = page.locator('a.item-link[href="/manager/71/cuponesdni/DNI"]');
-    this.seccionDNIsPago = page.locator('a.item-link[href="/manager/71/cuponesdni/Pago_DNI"]');
-    this.botonAgregarCuponDNI = page.locator('a[href="/manager/71/nuevocupondni/DNI"] i.material-icons');
-    this.botonAgregarCuponDNIPago = page.locator('a[href="/manager/71/nuevocupondni/Pago_DNI"] i.material-icons');
+    // Evitar hardcodear el id del manager (ej: 71) para que no rompa si cambia el entorno/datos.
+    this.seccionDNIs = page.locator('a.item-link[href$="/cuponesdni/DNI"]');
+    this.seccionDNIsPago = page.locator('a.item-link[href$="/cuponesdni/Pago_DNI"]');
+
+    // Clickear el <a> del FAB (más estable que apuntar al <i> interno)
+    this.botonAgregarCuponDNI = page.locator('div.custom-fab.fab-right-bottom a[href$="/nuevocupondni/DNI"]');
+    this.botonAgregarCuponDNIPago = page.locator('div.custom-fab.fab-right-bottom a[href$="/nuevocupondni/Pago_DNI"]');
     this.mensajeSinCupones = page.locator("p", { hasText: "No hay cupones disponibles." });
     this.botonGestionarGrupos = page.locator('a[title="Gestionar grupos"]');
   }
 
   async navegarASeccionDNIs() {
     await this.seccionDNIs.click();
-    await this.page.waitForURL("**/#!/manager/71/cuponesdni/DNI");
+    await expect(this.page).toHaveURL(/cuponesdni\/DNI/);
   }
 
   async navegarASeccionDNIsPago() {
     await this.seccionDNIsPago.click();
-    await this.page.waitForURL("**/#!/manager/71/cuponesdni/Pago_DNI");
+    await expect(this.page).toHaveURL(/cuponesdni\/Pago_DNI/);
   }
 
   async clickAgregarNuevoCuponDNI() {
+    // Esperar a que no haya loader/spinner tapando la UI
+    await expect(this.page.locator(".preloader, .spinner, .loading-indicator")).toBeHidden({ timeout: 10000 });
+
+    await expect(this.botonAgregarCuponDNI).toBeVisible({ timeout: 15000 });
     await this.botonAgregarCuponDNI.click();
-    await this.page.waitForURL("**/#!/manager/71/nuevocupondni/DNI");
+    await expect(this.page).toHaveURL(/nuevocupondni\/DNI/);
   }
 
   async clickAgregarNuevoCuponDNIPago() {
+    await expect(this.page.locator(".preloader, .spinner, .loading-indicator")).toBeHidden({ timeout: 10000 });
+
+    await expect(this.botonAgregarCuponDNIPago).toBeVisible({ timeout: 15000 });
     await this.botonAgregarCuponDNIPago.click();
-    await this.page.waitForURL("**/#!/manager/71/nuevocupondni/Pago_DNI");
+    await expect(this.page).toHaveURL(/nuevocupondni\/Pago_DNI/);
   }
 
   async buscarCuponPorNombre(nombre: string) {
@@ -48,7 +58,7 @@ export class CuponesDniPage {
   }
 
   async clickEditarCupon(cupon: Locator, tipo: 'DNI' | 'Pago_DNI') {
-    const botonEditar = cupon.locator(`a[href^="/manager/71/modificarcupondni/${tipo}/"] i.fa-pencil`);
+    const botonEditar = cupon.locator(`a[href*="/modificarcupondni/${tipo}/"] i.fa-pencil`);
     await expect(botonEditar).toBeVisible({ timeout: 5000 });
 
     // Obtener el href exacto para debuggear

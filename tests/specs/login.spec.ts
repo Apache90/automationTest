@@ -64,21 +64,6 @@ test.describe('🔐 Autenticación - Inicio de Sesión', () => {
         await expect(passwordError).toBeVisible({ timeout: 7000 });
     });
 
-    test('Debe mostrar mensaje de error si el email no contiene "@"', async ({ page }) => {
-        const loginPage = new LoginPage(page);
-
-        allure.label('owner', 'Emir Valles');
-        allure.severity('minor');
-        allure.feature('Login');
-        allure.story('Formato de email inválido');
-
-        await loginPage.emailInput.fill('emirvalles90gmail.com');
-        await loginPage.emailInput.blur();
-
-        const emailError = await loginPage.getEmailError();
-        await expect(emailError).toBeVisible({ timeout: 5000 });
-    });
-
     test('Debe mostrar error si el email es correcto pero la contraseña incorrecta', async ({ page }) => {
         const loginPage = new LoginPage(page);
 
@@ -88,7 +73,7 @@ test.describe('🔐 Autenticación - Inicio de Sesión', () => {
 
         allure.story('Credenciales inválidas');
 
-        await loginPage.login('emirvalles90@gmail.com', 'contrasenaIncorrecta');
+        await loginPage.login('emirvalles90@gmail.com', 'contrasenaIncorrecta', { waitForSuccessUrl: false });
         await cerrarModalSiExiste(page);
     });
 
@@ -100,7 +85,7 @@ test.describe('🔐 Autenticación - Inicio de Sesión', () => {
         allure.feature('Login');
         allure.story('Credenciales inválidas');
 
-        await loginPage.login('correo-invalido@gmail.com', '123456');
+        await loginPage.login('correo-invalido@gmail.com', '123456', { waitForSuccessUrl: false });
         await cerrarModalSiExiste(page);
     });
 

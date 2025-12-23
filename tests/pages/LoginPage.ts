@@ -20,16 +20,30 @@ export class LoginPage {
     }
 
     async navigate() {
-        await this.page.goto('https://stg.doorstickets.com/#!/login/');
+        await this.page.goto('https://www.doorstickets.com/#!/login/');
         await this.waitForReady();
     }
 
-    async login(email: string, password: string) {
+    async login(
+        email: string,
+        password: string,
+        options?: {
+            waitForSuccessUrl?: boolean;
+            successUrl?: string | RegExp;
+            timeoutMs?: number;
+        }
+    ) {
         await this.waitForReady();
         await this.emailInput.fill(email);
         await this.passwordInput.fill(password);
         await this.loginButton.click();
-        await this.page.waitForURL('**/#!/selectrole/', { timeout: 20000 });
+
+        const waitForSuccessUrl = options?.waitForSuccessUrl ?? true;
+        if (!waitForSuccessUrl) return;
+
+        const successUrl = options?.successUrl ?? '**/#!/selectrole/';
+        const timeoutMs = options?.timeoutMs ?? 20000;
+        await this.page.waitForURL(successUrl, { timeout: timeoutMs });
     }
 
     private async waitForReady() {

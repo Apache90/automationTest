@@ -10,31 +10,41 @@ export class CuponesQrPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.seccionQRs = page.locator('a.item-link[href="/manager/71/cuponesqr/QR"]');
-    this.seccionQRsPago = page.locator("label.svelte-1x3l73x", { hasText: "QR's Pago" });
-    this.botonAgregarCuponQR = page.locator('a[href="/manager/71/nuevocuponqr/QR"] i.material-icons');
-    this.botonAgregarCuponQRPago = page.locator('a[href="/manager/71/nuevocuponqr/Pago_QR"] i.material-icons');
+    // Evitar hardcodear el id del manager (ej: 71) para que no rompa si cambia el entorno/datos.
+    this.seccionQRs = page.locator('a.item-link[href$="/cuponesqr/QR"]');
+    this.seccionQRsPago = page.locator('a.item-link[href$="/cuponesqr/Pago_QR"]');
+
+    // Clickear el <a> del FAB (más estable que apuntar al <i> interno)
+    this.botonAgregarCuponQR = page.locator('div.custom-fab.fab-right-bottom a[href$="/nuevocuponqr/QR"]');
+    this.botonAgregarCuponQRPago = page.locator('div.custom-fab.fab-right-bottom a[href$="/nuevocuponqr/Pago_QR"]');
     this.mensajeSinCupones = page.locator(".item-inner", { hasText: "No tenés cupones." });
   }
 
   async navegarASeccionQRs() {
     await this.seccionQRs.click();
-    await this.page.waitForURL("**/#!/manager/71/cuponesqr/QR");
+    await expect(this.page).toHaveURL(/cuponesqr\/QR/);
   }
 
   async navegarASeccionQRsPago() {
+    await expect(this.seccionQRsPago).toBeVisible({ timeout: 15000 });
     await this.seccionQRsPago.click();
-    await this.page.waitForURL("**/#!/manager/71/cuponesqr/Pago_QR");
+    await expect(this.page).toHaveURL(/cuponesqr\/Pago_QR/);
   }
 
   async clickAgregarNuevoCuponQR() {
+    await expect(this.page.locator(".preloader, .spinner, .loading-indicator")).toBeHidden({ timeout: 10000 });
+
+    await expect(this.botonAgregarCuponQR).toBeVisible({ timeout: 15000 });
     await this.botonAgregarCuponQR.click();
-    await this.page.waitForURL("**/#!/manager/71/nuevocuponqr/QR");
+    await expect(this.page).toHaveURL(/nuevocuponqr\/QR/);
   }
 
   async clickAgregarNuevoCuponQRPago() {
+    await expect(this.page.locator(".preloader, .spinner, .loading-indicator")).toBeHidden({ timeout: 10000 });
+
+    await expect(this.botonAgregarCuponQRPago).toBeVisible({ timeout: 15000 });
     await this.botonAgregarCuponQRPago.click();
-    await this.page.waitForURL("**/#!/manager/71/nuevocuponqr/Pago_QR");
+    await expect(this.page).toHaveURL(/nuevocuponqr\/Pago_QR/);
   }
 
   async buscarCuponPorNombre(nombre: string) {
@@ -45,7 +55,7 @@ export class CuponesQrPage {
   }
 
   async clickEditarCupon(cupon: Locator) {
-    const botonEditar = cupon.locator('a[href^="/manager/71/modificarcuponqr/"]');
+    const botonEditar = cupon.locator('a[href*="/modificarcuponqr/"]');
     await expect(botonEditar).toBeVisible({ timeout: 5000 });
     await botonEditar.click();
   }
@@ -66,17 +76,17 @@ export class CuponesQrPage {
 
   async clickGestionarGruposQR() {
     // Click en el botón para gestionar grupos de QR
-    const botonGestionarGrupos = this.page.locator('a[href="/manager/71/modificargrupocupon/QR"] i.fa-ticket');
+    const botonGestionarGrupos = this.page.locator('a[href$="/modificargrupocupon/QR"] i.fa-ticket');
     await expect(botonGestionarGrupos).toBeVisible({ timeout: 5000 });
     await botonGestionarGrupos.click();
-    await this.page.waitForURL("**/#!/manager/71/modificargrupocupon/QR");
+    await expect(this.page).toHaveURL(/modificargrupocupon\/QR/);
   }
 
   async clickGestionarGruposQRPago() {
     // Click en el botón para gestionar grupos de QR Pago
-    const botonGestionarGrupos = this.page.locator('a[href="/manager/71/modificargrupocupon/Pago_QR"] i.fa-ticket');
+    const botonGestionarGrupos = this.page.locator('a[href$="/modificargrupocupon/Pago_QR"] i.fa-ticket');
     await expect(botonGestionarGrupos).toBeVisible({ timeout: 5000 });
     await botonGestionarGrupos.click();
-    await this.page.waitForURL("**/#!/manager/71/modificargrupocupon/Pago_QR");
+    await expect(this.page).toHaveURL(/modificargrupocupon\/Pago_QR/);
   }
 }
